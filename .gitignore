@@ -2,7 +2,6 @@
 .env
 
 # Configuration
-config/database.php
 config/database.local.php
 
 # Installation lock
