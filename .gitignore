@@ -1,0 +1,33 @@
+# Environment
+.env
+
+# Configuration
+config/database.php
+config/database.local.php
+
+# Installation lock
+app/storage/installed.lock
+
+# IDE / project files
+nbproject/
+.idea/
+.vscode/
+*.sublime-project
+*.sublime-workspace
+
+# OS files
+Thumbs.db
+.DS_Store
+Desktop.ini
+
+# Logs
+*.log
+app/storage/logs/*
+!app/storage/logs/.gitkeep
+
+# Uploads
+app/storage/uploads/*
+!app/storage/uploads/.gitkeep
+
+# Dependencies
+# PHPMailer source files are included in vendor/phpmailer/

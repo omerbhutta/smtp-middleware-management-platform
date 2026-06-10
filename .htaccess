@@ -1,0 +1,12 @@
+RewriteEngine On
+
+# API endpoint (clean URL)
+RewriteRule ^api/send$ api/send.php [L,QSA]
+
+# Allow direct access to existing files and directories
+RewriteCond %{REQUEST_FILENAME} -f [OR]
+RewriteCond %{REQUEST_FILENAME} -d
+RewriteRule ^ - [L]
+
+# Route everything through the front controller
+RewriteRule ^(.*)$ index.php?route=$1 [QSA,L]
