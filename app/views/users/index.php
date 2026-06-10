@@ -10,7 +10,7 @@
                     <tr>
                         <th>User</th>
                         <th>Email</th>
-                        <th>Role</th>
+                        <th>Department</th>
                         <th>Status</th>
                         <th>MFA</th>
                         <th>Last Login</th>
@@ -29,7 +29,7 @@
                             </div>
                         </td>
                         <td><?= escape($user['email']) ?></td>
-                        <td><span class="badge-smm badge-smm-info"><?= escape($user['role']) ?></span></td>
+                        <td><span style="color:var(--text-muted);font-size:0.82rem;"><?= escape($user['department_name'] ?? '—') ?></span></td>
                         <td>
                             <span class="badge-smm badge-smm-<?= $user['status'] === 'active' ? 'success' : 'danger' ?>">
                                 <?= $user['status'] ?>
@@ -43,7 +43,9 @@
                         <td><span style="color:var(--text-muted);font-size:0.82rem;"><?= timeAgo($user['last_login']) ?></span></td>
                         <td style="text-align:right;">
                             <a href="users/edit?id=<?= $user['id'] ?>" class="btn-smm btn-smm-secondary btn-smm-xs"><i class="fas fa-edit"></i></a>
+                            <?php if ($user['id'] != $_SESSION['user_id']): ?>
                             <a href="users/delete?id=<?= $user['id'] ?>" class="btn-smm btn-smm-danger btn-smm-xs" onclick="return confirm('Delete this user?')"><i class="fas fa-trash"></i></a>
+                            <?php endif; ?>
                         </td>
                     </tr>
                     <?php endforeach; ?>

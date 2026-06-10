@@ -70,6 +70,7 @@ class Auth
             $_SESSION['username']      = $user['username'];
             $_SESSION['email']         = $user['email'];
             $_SESSION['role']          = $user['role'];
+            $_SESSION['department_id'] = $user['department_id'];
             $_SESSION['logged_in']     = true;
             $_SESSION['theme']         = $user['theme'] ?? 'dark';
             $_SESSION['sidebar_state'] = $user['sidebar_state'] ?? 'collapsed';
@@ -91,6 +92,11 @@ class Auth
             header('Location: ' . BASE_URL . 'auth/login');
             exit;
         }
+    }
+
+    public function getDepartmentId()
+    {
+        return $_SESSION['department_id'] ?? null;
     }
 
     public function getCurrentUser()

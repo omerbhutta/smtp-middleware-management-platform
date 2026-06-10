@@ -8,15 +8,24 @@ class User
         $this->db = Database::getInstance();
     }
 
-    public function getAll($status = null)
+    public function getAll($status = null, $departmentId = null)
     {
-        $sql = "SELECT * FROM users";
+        $sql = "SELECT u.*, d.name as department_name FROM users u
+                LEFT JOIN departments d ON u.department_id = d.id";
         $params = [];
+        $conditions = [];
         if ($status) {
-            $sql .= " WHERE status = :status";
+            $conditions[] = "u.status = :status";
             $params['status'] = $status;
         }
-        $sql .= " ORDER BY created_at DESC";
+        if ($departmentId) {
+            $conditions[] = "u.department_id = :dept_id";
+            $params['dept_id'] = $departmentId;
+        }
+        if ($conditions) {
+            $sql .= " WHERE " . implode(' AND ', $conditions);
+        }
+        $sql .= " ORDER BY u.created_at DESC";
         return $this->db->fetchAll($sql, $params);
     }
 

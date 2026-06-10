@@ -233,6 +233,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                 $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
                 $stmt = $pdo->prepare("INSERT INTO users (username, email, password, mfa_enabled, role, status) VALUES (?, ?, ?, 1, 'admin', 'active')");
+
                 $stmt->execute([$username, $email, $hashedPassword]);
 
                 $stmt = $pdo->prepare("INSERT INTO system_settings (setting_key, setting_value) VALUES ('app_name', ?), ('app_timezone', ?), ('forbidden_emails', ?), ('installer_locked', '1')");

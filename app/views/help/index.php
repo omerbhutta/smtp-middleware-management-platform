@@ -99,7 +99,7 @@
 
                 <h5 style="color:var(--text-primary);">Endpoint</h5>
                 <div class="code-block" style="background:var(--bg-card);border:1px solid var(--border-color);border-radius:6px;padding:8px 12px;font-family:'Courier New',monospace;font-size:0.82rem;color:var(--cyan);">
-                    POST https://yourdomain.com/api/send
+                    POST <?= BASE_URL ?>api/send
                 </div>
 
                 <h5 class="mt-3" style="color:var(--text-primary);">Parameters</h5>
@@ -143,7 +143,7 @@
                 <h5 class="mt-3" style="color:var(--text-primary);">cURL Example</h5>
                 <div class="code-block" style="background:var(--bg-card);border:1px solid var(--border-color);border-radius:6px;padding:12px;font-family:'Courier New',monospace;font-size:0.78rem;overflow-x:auto;">
                     <div style="color:var(--text-secondary);">
-                        curl -X POST https://yourdomain.com/api/send \<br>
+                        curl -X POST <?= BASE_URL ?>api/send \<br>
                         &nbsp;&nbsp;-d "security=your_api_key" \<br>
                         &nbsp;&nbsp;-d "subject=Hello" \<br>
                         &nbsp;&nbsp;-d "to=user@example.com" \<br>

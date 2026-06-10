@@ -8,15 +8,23 @@ class Department
         $this->db = Database::getInstance();
     }
 
-    public function getAll($status = null)
+    public function getAll($status = null, $departmentId = null)
     {
         $sql = "SELECT d.*, (SELECT COUNT(*) FROM security_keys WHERE department_id = d.id) as key_count,
                 (SELECT COUNT(*) FROM smtp_accounts WHERE department_id = d.id) as smtp_count
                 FROM departments d";
         $params = [];
+        $conditions = [];
         if ($status) {
-            $sql .= " WHERE d.status = :status";
+            $conditions[] = "d.status = :status";
             $params['status'] = $status;
+        }
+        if ($departmentId) {
+            $conditions[] = "d.id = :dept_id";
+            $params['dept_id'] = $departmentId;
+        }
+        if ($conditions) {
+            $sql .= " WHERE " . implode(' AND ', $conditions);
         }
         $sql .= " ORDER BY d.created_at DESC";
         return $this->db->fetchAll($sql, $params);

@@ -58,16 +58,25 @@ try {
         // column already exists, ignore
     }
 
+    // Auto-migration: add department_id column for user-department association
+    try {
+        $pdo->exec("ALTER TABLE `users` ADD COLUMN `department_id` INT NULL AFTER `role`");
+    } catch (PDOException $e) {
+        // column already exists
+    }
+
     $settings = new SystemSetting();
     $appSettings = $settings->getAllAsArray();
     date_default_timezone_set($appSettings['app_timezone'] ?? 'UTC');
 
     // Restore user preferences from DB if missing from session (fresh login / new device)
     if (!empty($_SESSION['logged_in']) && empty($_SESSION['theme'])) {
-        $userRow = $db->fetchOne("SELECT theme, sidebar_state FROM users WHERE id = :id", ['id' => $_SESSION['user_id'] ?? 0]);
+        $userRow = $db->fetchOne("SELECT theme, sidebar_state, role, department_id FROM users WHERE id = :id", ['id' => $_SESSION['user_id'] ?? 0]);
         if ($userRow) {
             $_SESSION['theme']         = $userRow['theme'] ?? 'dark';
             $_SESSION['sidebar_state'] = $userRow['sidebar_state'] ?? 'collapsed';
+            $_SESSION['role']          = $userRow['role'] ?? 'super_admin';
+            $_SESSION['department_id'] = $userRow['department_id'];
         }
     }
 } catch (Exception $e) {

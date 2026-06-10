@@ -39,6 +39,9 @@
                 </a>
 
                 <div class="sidebar-section sidebar-text">Management</div>
+                <a href="users" class="nav-link-smm <?= $active_menu === 'users' ? 'active' : '' ?>">
+                    <i class="fas fa-users"></i> <span class="sidebar-text">Users</span>
+                </a>
                 <a href="smtp_accounts" class="nav-link-smm <?= $active_menu === 'smtp_accounts' ? 'active' : '' ?>">
                     <i class="fas fa-server"></i> <span class="sidebar-text">SMTP Accounts</span>
                 </a>
