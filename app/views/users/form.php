@@ -5,11 +5,15 @@
     <div class="card-smm-body">
         <form method="POST" action="users/<?= $edit_mode ? 'edit?id=' . $user['id'] : 'create' ?>">
             <div class="row g-3">
-                <div class="col-md-6">
+                <div class="col-md-4">
+                    <label class="form-label-smm">Full Name</label>
+                    <input type="text" name="full_name" class="form-control-smm" value="<?= escape($user['full_name'] ?? '') ?>" required>
+                </div>
+                <div class="col-md-4">
                     <label class="form-label-smm">Username</label>
                     <input type="text" name="username" class="form-control-smm" value="<?= escape($user['username'] ?? '') ?>" <?= $edit_mode ? 'readonly' : 'required' ?>>
                 </div>
-                <div class="col-md-6">
+                <div class="col-md-4">
                     <label class="form-label-smm">Email</label>
                     <input type="email" name="email" class="form-control-smm" value="<?= escape($user['email'] ?? '') ?>" required>
                 </div>

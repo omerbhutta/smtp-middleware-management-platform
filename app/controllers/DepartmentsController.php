@@ -32,6 +32,11 @@ class DepartmentsController
                 'description' => $_POST['description'] ?? '',
                 'status'      => $_POST['status'] ?? 'active',
             ]);
+            notifyAllUsers(
+                'New Department Created',
+                'A new department has been created by ' . ($_SESSION['full_name'] ?? $_SESSION['username']) . ".\n\n"
+                . 'Department: ' . $_POST['name']
+            );
             flash('success', 'Department created successfully.');
             header('Location: ' . BASE_URL . 'departments');
             exit;
@@ -95,7 +100,15 @@ class DepartmentsController
 
         $id = $_GET['id'] ?? 0;
         $deptModel = new Department();
+        $dept = $deptModel->getById($id);
         $deptModel->delete($id);
+        if ($dept) {
+            notifyAllUsers(
+                'Department Deleted',
+                'A department has been deleted by ' . ($_SESSION['full_name'] ?? $_SESSION['username']) . ".\n\n"
+                . 'Department: ' . $dept['name']
+            );
+        }
         flash('success', 'Department deleted successfully.');
         header('Location: ' . BASE_URL . 'departments');
         exit;

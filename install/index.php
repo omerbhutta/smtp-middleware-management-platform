@@ -231,10 +231,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
                 ]);
 
+                $fullName = $_POST['full_name'] ?? $username;
                 $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
-                $stmt = $pdo->prepare("INSERT INTO users (username, email, password, mfa_enabled, role, status) VALUES (?, ?, ?, 1, 'admin', 'active')");
+                $stmt = $pdo->prepare("INSERT INTO users (username, full_name, email, password, mfa_enabled, role, status) VALUES (?, ?, ?, ?, 1, 'admin', 'active')");
 
-                $stmt->execute([$username, $email, $hashedPassword]);
+                $stmt->execute([$username, $fullName, $email, $hashedPassword]);
 
                 $stmt = $pdo->prepare("INSERT INTO system_settings (setting_key, setting_value) VALUES ('app_name', ?), ('app_timezone', ?), ('forbidden_emails', ?), ('installer_locked', '1')");
                 $stmt->execute([$appName, $timezone, DEFAULT_FORBIDDEN_EMAILS]);
@@ -408,14 +409,19 @@ $allPassed = !in_array(false, $checks, true);
                 <input type="hidden" name="step" value="2">
                 <div class="row">
                     <div class="col-md-6 mb-3">
+                        <label class="form-label">Full Name</label>
+                        <input type="text" name="full_name" class="form-control" value="Administrator" required>
+                    </div>
+                    <div class="col-md-6 mb-3">
                         <label class="form-label">Username</label>
                         <input type="text" name="username" class="form-control" value="admin" required>
                     </div>
+                </div>
+                <div class="row">
                     <div class="col-md-6 mb-3">
                         <label class="form-label">Email</label>
                         <input type="email" name="email" class="form-control" placeholder="admin@example.com" required>
                     </div>
-                </div>
                 <div class="mb-3">
                     <label class="form-label">Password</label>
                     <input type="password" name="password" class="form-control" required minlength="6">

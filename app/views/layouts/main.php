@@ -116,9 +116,9 @@
                 <div class="dropdown">
                     <a href="#" class="d-flex align-items-center gap-2 text-decoration-none" data-bs-toggle="dropdown" style="color:var(--text-primary);">
                         <div style="width:28px;height:28px;border-radius:6px;background:var(--gradient-accent);display:flex;align-items:center;justify-content:center;font-size:0.7rem;color:#fff;font-weight:600;">
-                            <?= strtoupper(substr($_SESSION['username'] ?? 'U', 0, 1)) ?>
+                            <?= strtoupper(substr($_SESSION['full_name'] ?? $_SESSION['username'] ?? 'U', 0, 1)) ?>
                         </div>
-                        <span class="d-none d-sm-inline user-name-text" style="font-size:0.82rem;"><?= escape($_SESSION['username'] ?? 'User') ?></span>
+                        <span class="d-none d-sm-inline user-name-text" style="font-size:0.82rem;"><?= escape($_SESSION['full_name'] ?? $_SESSION['username'] ?? 'User') ?></span>
                     </a>
                     <ul class="dropdown-menu dropdown-menu-end" style="background:var(--bg-card);border:1px solid var(--border-color);border-radius:12px;padding:8px;min-width:160px;box-shadow:var(--shadow-lg);">
                         <li><a class="dropdown-item" href="users/edit?id=<?= $_SESSION['user_id'] ?? 0 ?>" style="border-radius:8px;padding:8px 12px;color:var(--text-secondary);"><i class="fas fa-user-cog me-2"></i>Profile</a></li>

@@ -8,6 +8,11 @@ class User
         $this->db = Database::getInstance();
     }
 
+    public function getAllActive()
+    {
+        return $this->db->fetchAll("SELECT id, username, full_name, email FROM users WHERE status = 'active' ORDER BY full_name ASC");
+    }
+
     public function getAll($status = null, $departmentId = null)
     {
         $sql = "SELECT u.*, d.name as department_name FROM users u

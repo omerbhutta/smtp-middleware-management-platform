@@ -8,9 +8,9 @@
             <table class="table-modern">
                 <thead>
                     <tr>
-                        <th>User</th>
+                        <th>Name</th>
+                        <th>Username</th>
                         <th>Email</th>
-                        <th>Department</th>
                         <th>Status</th>
                         <th>MFA</th>
                         <th>Last Login</th>
@@ -23,13 +23,13 @@
                         <td>
                             <div class="d-flex align-items-center gap-2">
                                 <div style="width:32px;height:32px;border-radius:8px;background:linear-gradient(135deg,#3b82f6,#06b6d4);display:flex;align-items:center;justify-content:center;font-size:0.75rem;color:#fff;font-weight:600;flex-shrink:0;">
-                                    <?= strtoupper(substr($user['username'], 0, 1)) ?>
+                                    <?= strtoupper(substr($user['full_name'] ?? $user['username'], 0, 1)) ?>
                                 </div>
-                                <strong><?= escape($user['username']) ?></strong>
+                                <strong><?= escape($user['full_name'] ?? $user['username']) ?></strong>
                             </div>
                         </td>
+                        <td><span style="color:var(--text-muted);font-size:0.82rem;"><?= escape($user['username']) ?></span></td>
                         <td><?= escape($user['email']) ?></td>
-                        <td><span style="color:var(--text-muted);font-size:0.82rem;"><?= escape($user['department_name'] ?? '—') ?></span></td>
                         <td>
                             <span class="badge-smm badge-smm-<?= $user['status'] === 'active' ? 'success' : 'danger' ?>">
                                 <?= $user['status'] ?>
@@ -50,7 +50,7 @@
                     </tr>
                     <?php endforeach; ?>
                     <?php if (empty($users)): ?>
-                    <tr><td colspan="7"><div class="empty-state"><i class="fas fa-users"></i><h4>No Users Found</h4><p>Create your first user to get started.</p></div></td></tr>
+                    <tr><td colspan="8"><div class="empty-state"><i class="fas fa-users"></i><h4>No Users Found</h4><p>Create your first user to get started.</p></div></td></tr>
                     <?php endif; ?>
                 </tbody>
             </table>

@@ -65,6 +65,13 @@ try {
         // column already exists
     }
 
+    // Auto-migration: add full_name column
+    try {
+        $pdo->exec("ALTER TABLE `users` ADD COLUMN `full_name` VARCHAR(255) NULL AFTER `username`");
+    } catch (PDOException $e) {
+        // column already exists
+    }
+
     $settings = new SystemSetting();
     $appSettings = $settings->getAllAsArray();
     date_default_timezone_set($appSettings['app_timezone'] ?? 'UTC');

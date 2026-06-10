@@ -45,6 +45,13 @@ class SmtpAccountsController
                 $settings = new SystemSetting();
                 $settings->set('portal_smtp_id', $id);
             }
+            notifyAllUsers(
+                'New SMTP Account Added',
+                'A new SMTP account has been added by ' . ($_SESSION['full_name'] ?? $_SESSION['username']) . ".\n\n"
+                . 'Provider: ' . $_POST['provider_type'] . "\n"
+                . 'Host: ' . $_POST['smtp_host'] . "\n"
+                . 'Sender: ' . $_POST['sender_email']
+            );
             flash('success', 'SMTP account created successfully.');
             header('Location: ' . BASE_URL . 'smtp_accounts');
             exit;
@@ -165,7 +172,17 @@ class SmtpAccountsController
 
         $id = $_GET['id'] ?? 0;
         $smtpModel = new SmtpAccount();
+        $acc = $smtpModel->getById($id);
         $smtpModel->delete($id);
+        if ($acc) {
+            notifyAllUsers(
+                'SMTP Account Deleted',
+                'An SMTP account has been deleted by ' . ($_SESSION['full_name'] ?? $_SESSION['username']) . ".\n\n"
+                . 'Provider: ' . $acc['provider_type'] . "\n"
+                . 'Host: ' . $acc['smtp_host'] . "\n"
+                . 'Sender: ' . $acc['sender_email']
+            );
+        }
         flash('success', 'SMTP account deleted successfully.');
         header('Location: ' . BASE_URL . 'smtp_accounts');
         exit;

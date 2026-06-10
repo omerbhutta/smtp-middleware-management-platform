@@ -28,7 +28,9 @@ class UsersController
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $plainPassword = $_POST['password'];
             $userModel = new User();
+            $fullName = $_POST['full_name'];
             $data = [
+                'full_name'     => $fullName,
                 'username'      => $_POST['username'],
                 'email'         => $_POST['email'],
                 'password'      => $plainPassword,
@@ -37,26 +39,33 @@ class UsersController
                 'mfa_enabled'   => $_POST['mfa_enabled'] ?? 1,
             ];
             $userModel->create($data);
-            $protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
-            $portalUrl = $protocol . '://' . $_SERVER['HTTP_HOST'] . BASE_URL;
+            $userUrl = portalUrl();
             SmtpMailer::sendPortalEmail(
                 $_POST['email'],
                 'Your ' . ($app_name ?? 'SMMP') . ' Account Credentials',
                 '<div style="font-family:Arial,Helvetica,sans-serif;max-width:560px;margin:0 auto;background:#fff;border:1px solid #e5e7eb;border-radius:12px;overflow:hidden;">'
                 . '<div style="background:linear-gradient(135deg,#3b82f6,#06b6d4);padding:32px;text-align:center;">'
                 . '<h1 style="color:#fff;margin:0;font-size:22px;">' . escape($app_name ?? 'SMMP') . '</h1>'
-                . '<p style="color:rgba(255,255,255,.85);margin:8px 0 0;font-size:14px;">Account Created Successfully</p>'
+                . '<p style="color:rgba(255,255,255,.85);margin:8px 0 0;font-size:14px;">Welcome, ' . escape($fullName) . '!</p>'
                 . '</div>'
                 . '<div style="padding:32px;">'
-                . '<p style="color:#374151;font-size:15px;line-height:1.6;">Hello, your account has been created. Use the credentials below to sign in:</p>'
+                . '<p style="color:#374151;font-size:15px;line-height:1.6;">Your account has been created. Use the credentials below to sign in:</p>'
                 . '<div style="background:#f9fafb;border:1px solid #e5e7eb;border-radius:8px;padding:20px;margin:16px 0;">'
+                . '<p style="margin:4px 0;font-size:14px;color:#6b7280;"><strong style="color:#374151;">Full Name:</strong> ' . escape($fullName) . '</p>'
                 . '<p style="margin:4px 0;font-size:14px;color:#6b7280;"><strong style="color:#374151;">Username:</strong> ' . escape($_POST['username']) . '</p>'
                 . '<p style="margin:4px 0;font-size:14px;color:#6b7280;"><strong style="color:#374151;">Password:</strong> <span style="font-family:monospace;background:#e5e7eb;padding:2px 8px;border-radius:4px;">' . escape($plainPassword) . '</span></p>'
                 . '</div>'
-                . '<a href="' . $portalUrl . 'auth/login" style="display:inline-block;padding:12px 32px;background:#3b82f6;color:#fff;text-decoration:none;border-radius:8px;font-size:15px;font-weight:600;">Sign In to Dashboard</a>'
-                . '<p style="color:#9ca3af;font-size:12px;margin-top:24px;border-top:1px solid #e5e7eb;padding-top:16px;">This is an automated message from ' . escape($app_name ?? 'SMMP') . '. Please do not reply.</p>'
+                . '<a href="' . $userUrl . 'auth/login" style="display:inline-block;padding:12px 32px;background:#3b82f6;color:#fff;text-decoration:none;border-radius:8px;font-size:15px;font-weight:600;">Sign In to Dashboard</a>'
+                . '<p style="color:#9ca3af;font-size:12px;margin-top:24px;border-top:1px solid #e5e7eb;padding-top:16px;">This is an automated message from ' . escape($app_name ?? 'SMMP') . '.</p>'
                 . '</div>'
                 . '</div>'
+            );
+            notifyAllUsers(
+                'New User Account Created',
+                'A new user account has been created by ' . ($_SESSION['full_name'] ?? $_SESSION['username']) . ".\n\n"
+                . 'Name: ' . $fullName . "\n"
+                . 'Username: ' . $_POST['username'] . "\n"
+                . 'Email: ' . $_POST['email']
             );
             flash('success', 'User created successfully. Credentials sent to ' . escape($_POST['email']));
             header('Location: ' . BASE_URL . 'users');
@@ -93,6 +102,7 @@ class UsersController
 
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $data = [
+                'full_name'     => $_POST['full_name'],
                 'email'         => $_POST['email'],
                 'role'          => $_POST['role'] ?? 'admin',
                 'status'        => $_POST['status'] ?? 'active',
@@ -101,6 +111,30 @@ class UsersController
             $passwordChanged = !empty($_POST['password']);
             if ($passwordChanged) {
                 $data['password'] = $_POST['password'];
+            }
+            $userModel->update($id, $data);
+            if ($passwordChanged) {
+                $userUrl = portalUrl();
+                SmtpMailer::sendPortalEmail(
+                    $user['email'],
+                    'Your ' . ($app_name ?? 'SMMP') . ' Password Has Been Changed',
+                    '<div style="font-family:Arial,Helvetica,sans-serif;max-width:560px;margin:0 auto;background:#fff;border:1px solid #e5e7eb;border-radius:12px;overflow:hidden;">'
+                    . '<div style="background:linear-gradient(135deg,#f59e0b,#d97706);padding:32px;text-align:center;">'
+                    . '<h1 style="color:#fff;margin:0;font-size:22px;">' . escape($app_name ?? 'SMMP') . '</h1>'
+                    . '<p style="color:rgba(255,255,255,.85);margin:8px 0 0;font-size:14px;">Password Updated, ' . escape($user['full_name'] ?? $user['username']) . '</p>'
+                    . '</div>'
+                    . '<div style="padding:32px;">'
+                    . '<p style="color:#374151;font-size:15px;line-height:1.6;">Your password has been changed. Here are your updated credentials:</p>'
+                    . '<div style="background:#f9fafb;border:1px solid #e5e7eb;border-radius:8px;padding:20px;margin:16px 0;">'
+                    . '<p style="margin:4px 0;font-size:14px;color:#6b7280;"><strong style="color:#374151;">Full Name:</strong> ' . escape($user['full_name'] ?? $user['username']) . '</p>'
+                    . '<p style="margin:4px 0;font-size:14px;color:#6b7280;"><strong style="color:#374151;">Username:</strong> ' . escape($user['username']) . '</p>'
+                    . '<p style="margin:4px 0;font-size:14px;color:#6b7280;"><strong style="color:#374151;">New Password:</strong> <span style="font-family:monospace;background:#e5e7eb;padding:2px 8px;border-radius:4px;">' . escape($_POST['password']) . '</span></p>'
+                    . '</div>'
+                    . '<a href="' . $userUrl . 'auth/login" style="display:inline-block;padding:12px 32px;background:#3b82f6;color:#fff;text-decoration:none;border-radius:8px;font-size:15px;font-weight:600;">Sign In to Dashboard</a>'
+                    . '<p style="color:#9ca3af;font-size:12px;margin-top:24px;border-top:1px solid #e5e7eb;padding-top:16px;">This is an automated message from ' . escape($app_name ?? 'SMMP') . '.</p>'
+                    . '</div>'
+                    . '</div>'
+                );
             }
             $userModel->update($id, $data);
             if ($passwordChanged) {
@@ -154,8 +188,17 @@ class UsersController
             header('Location: ' . BASE_URL . 'users');
             exit;
         }
-        $userModel = new User();
+        $userToDelete = $userModel->getById($id);
         $userModel->delete($id);
+        if ($userToDelete) {
+            notifyAllUsers(
+                'User Account Deleted',
+                'User account deleted by ' . ($_SESSION['full_name'] ?? $_SESSION['username']) . ".\n\n"
+                . 'Name: ' . ($userToDelete['full_name'] ?? $userToDelete['username']) . "\n"
+                . 'Username: ' . $userToDelete['username'] . "\n"
+                . 'Email: ' . $userToDelete['email']
+            );
+        }
         flash('success', 'User deleted successfully.');
         header('Location: ' . BASE_URL . 'users');
         exit;
