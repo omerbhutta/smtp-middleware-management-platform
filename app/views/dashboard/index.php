@@ -21,14 +21,20 @@
         </h1>
         <p class="hero-subtitle">SMTP Middleware Management Platform &mdash; <span id="currentDate"></span></p>
     </div>
+    <?php
+    $today = date('Y-m-d');
+    $monthStart = date('Y-m-01');
+    $totalAll = $stats['today_count'] + $stats['failed_count'];
+    $deliveryRate = $totalAll > 0 ? round(($stats['today_count'] / $totalAll) * 100, 1) : 100;
+    ?>
     <div class="hero-stats" style="position:relative;z-index:1;">
         <div class="hero-stat">
             <div class="hero-stat-value"><span class="status-dot online"></span> Online</div>
             <div class="hero-stat-label">Server Status</div>
         </div>
         <div class="hero-stat">
-            <div class="hero-stat-value" style="color:var(--emerald);">98.6%</div>
-            <div class="hero-stat-label">Delivery Rate</div>
+            <div class="hero-stat-value" style="color:var(--emerald);"><?= $deliveryRate ?>%</div>
+            <div class="hero-stat-label">Delivery Rate (Today)</div>
         </div>
         <div class="hero-stat">
             <div class="hero-stat-value" style="color:var(--blue-primary);">Stable</div>
@@ -37,90 +43,116 @@
     </div>
 </div>
 
-<!-- Premium Stats Cards -->
 <div class="stats-grid">
-    <div class="stat-card blue animate-fade-up stagger-1">
-        <div class="stat-card-header">
-            <div class="stat-card-icon" style="position:relative;">
-                <div class="anim-rings" style="position:absolute;inset:-4px;">
-                    <div class="anim-rings-ring"></div>
-                    <div class="anim-rings-ring"></div>
-                    <div class="anim-rings-ring"></div>
+    <a href="email_logs?date_from=<?= $today ?>&date_to=<?= $today ?>" class="stat-card-link">
+        <div class="stat-card blue animate-fade-up stagger-1">
+            <div class="stat-card-header">
+                <div class="stat-card-icon" style="position:relative;">
+                    <div class="anim-rings" style="position:absolute;inset:-4px;">
+                        <div class="anim-rings-ring"></div>
+                        <div class="anim-rings-ring"></div>
+                        <div class="anim-rings-ring"></div>
+                    </div>
+                    <i class="fas fa-paper-plane" style="position:relative;z-index:1;"></i>
                 </div>
-                <i class="fas fa-paper-plane" style="position:relative;z-index:1;"></i>
+                <span class="stat-card-trend up"><i class="fas fa-arrow-up"></i> +<?= $week_pct ?>%</span>
             </div>
-            <span class="stat-card-trend up"><i class="fas fa-arrow-up"></i> +12%</span>
+            <div class="stat-card-value"><span class="stat-counter" data-target="<?= $stats['today_count'] ?>">0</span></div>
+            <div class="stat-card-label">Emails Sent Today</div>
+            <div class="mini-chart" id="miniChart1"></div>
         </div>
-        <div class="stat-card-value"><span class="stat-counter" data-target="<?= $stats['today_count'] ?>">0</span></div>
-        <div class="stat-card-label">Emails Sent Today</div>
-        <div class="mini-chart" id="miniChart1"></div>
-    </div>
+    </a>
 
-    <div class="stat-card green animate-fade-up stagger-2">
-        <div class="stat-card-header">
-            <div class="stat-card-icon"><i class="fas fa-calendar-alt"></i></div>
-            <span class="stat-card-trend up"><i class="fas fa-arrow-up"></i> +8%</span>
+    <a href="email_logs?date_from=<?= $monthStart ?>" class="stat-card-link">
+        <div class="stat-card green animate-fade-up stagger-2">
+            <div class="stat-card-header">
+                <div class="stat-card-icon"><i class="fas fa-calendar-alt"></i></div>
+                <span class="stat-card-trend up"><i class="fas fa-arrow-up"></i> +<?= $month_pct ?>%</span>
+            </div>
+            <div class="stat-card-value"><span class="stat-counter" data-target="<?= $stats['month_count'] ?>">0</span></div>
+            <div class="stat-card-label">Emails Sent This Month</div>
+            <div class="mini-chart" id="miniChart2"></div>
         </div>
-        <div class="stat-card-value"><span class="stat-counter" data-target="<?= $stats['month_count'] ?>">0</span></div>
-        <div class="stat-card-label">Emails Sent This Month</div>
-        <div class="mini-chart" id="miniChart2"></div>
-    </div>
+    </a>
 
-    <div class="stat-card red animate-fade-up stagger-3">
-        <div class="stat-card-header">
-            <div class="stat-card-icon"><i class="fas fa-exclamation-triangle"></i></div>
-            <span class="stat-card-trend down"><i class="fas fa-arrow-down"></i> +2%</span>
+    <a href="email_logs?status=failed" class="stat-card-link">
+        <div class="stat-card red animate-fade-up stagger-3">
+            <div class="stat-card-header">
+                <div class="stat-card-icon"><i class="fas fa-exclamation-triangle"></i></div>
+                <span class="stat-card-trend down"><i class="fas fa-arrow-<?= $failed_pct >= 0 ? 'up' : 'down' ?>"></i> <?= abs($failed_pct) ?>%</span>
+            </div>
+            <div class="stat-card-value"><span class="stat-counter" data-target="<?= $stats['failed_count'] ?>">0</span></div>
+            <div class="stat-card-label">Failed Requests</div>
         </div>
-        <div class="stat-card-value"><span class="stat-counter" data-target="<?= $stats['failed_count'] ?>">0</span></div>
-        <div class="stat-card-label">Failed Requests</div>
-    </div>
+    </a>
 
-    <div class="stat-card purple animate-fade-up stagger-4">
-        <div class="stat-card-header">
-            <div class="stat-card-icon"><i class="fas fa-ban"></i></div>
-            <span class="stat-card-trend up"><i class="fas fa-shield"></i> Protected</span>
+    <a href="email_logs?search=Skipped" class="stat-card-link">
+        <div class="stat-card orange animate-fade-up stagger-4">
+            <div class="stat-card-header">
+                <div class="stat-card-icon"><i class="fas fa-filter"></i></div>
+                <span class="stat-card-trend up"><i class="fas fa-shield"></i> Blocked</span>
+            </div>
+            <div class="stat-card-value"><span class="stat-counter" data-target="<?= $stats['skipped_count'] ?>">0</span></div>
+            <div class="stat-card-label">Requests With Skipped Recipients</div>
+            <div style="margin-top:4px;display:flex;gap:10px;font-size:0.65rem;color:var(--text-muted);">
+                <span><span style="color:var(--rose);">●</span> Forbidden: <strong><?= $stats['skipped_breakdown']['forbidden'] ?? 0 ?></strong></span>
+                <span><span style="color:var(--amber);">●</span> Suppressed: <strong><?= $stats['skipped_breakdown']['suppressed'] ?? 0 ?></strong></span>
+            </div>
         </div>
-        <div class="stat-card-value"><span class="stat-counter" data-target="<?= $stats['suppressed_count'] ?>">0</span></div>
-        <div class="stat-card-label">Suppressed Emails Blocked</div>
-    </div>
+    </a>
 
-    <div class="stat-card cyan animate-fade-up stagger-5">
-        <div class="stat-card-header">
-            <div class="stat-card-icon"><i class="fas fa-building"></i></div>
+    <a href="suppression" class="stat-card-link">
+        <div class="stat-card purple animate-fade-up stagger-5">
+            <div class="stat-card-header">
+                <div class="stat-card-icon"><i class="fas fa-ban"></i></div>
+                <span class="stat-card-trend up"><i class="fas fa-shield"></i> Protected</span>
+            </div>
+            <div class="stat-card-value"><span class="stat-counter" data-target="<?= $stats['suppressed_count'] ?>">0</span></div>
+            <div class="stat-card-label">Suppressed Addresses</div>
         </div>
-        <div class="stat-card-value"><span class="stat-counter" data-target="<?= $stats['active_departments'] ?>">0</span></div>
-        <div class="stat-card-label">Active Departments</div>
-    </div>
+    </a>
 
-    <div class="stat-card amber animate-fade-up stagger-6">
-        <div class="stat-card-header">
-            <div class="stat-card-icon"><i class="fas fa-server"></i></div>
+    <a href="departments" class="stat-card-link">
+        <div class="stat-card cyan animate-fade-up stagger-6">
+            <div class="stat-card-header">
+                <div class="stat-card-icon"><i class="fas fa-building"></i></div>
+            </div>
+            <div class="stat-card-value"><span class="stat-counter" data-target="<?= $stats['active_departments'] ?>">0</span></div>
+            <div class="stat-card-label">Active Departments</div>
         </div>
-        <div class="stat-card-value"><span class="stat-counter" data-target="<?= $stats['active_smtp'] ?>">0</span></div>
-        <div class="stat-card-label">Active SMTP Accounts</div>
-    </div>
+    </a>
+
+    <a href="smtp_accounts" class="stat-card-link">
+        <div class="stat-card amber animate-fade-up stagger-7">
+            <div class="stat-card-header">
+                <div class="stat-card-icon"><i class="fas fa-server"></i></div>
+            </div>
+            <div class="stat-card-value"><span class="stat-counter" data-target="<?= $stats['active_smtp'] ?>">0</span></div>
+            <div class="stat-card-label">Active SMTP Accounts</div>
+        </div>
+    </a>
 </div>
 
 <!-- Charts -->
 <div class="chart-grid">
     <div class="chart-card">
         <div class="chart-card-title"><i class="fas fa-chart-area" style="color:var(--blue-primary);"></i> Daily Email Traffic</div>
-        <canvas id="dailyChart"></canvas>
+        <div style="position:relative;height:240px;"><canvas id="dailyChart"></canvas></div>
     </div>
     <div class="chart-card">
         <div class="chart-card-title"><i class="fas fa-chart-pie" style="color:var(--purple);"></i> SMTP Provider Usage</div>
-        <canvas id="providerChart"></canvas>
+        <div style="position:relative;height:240px;"><canvas id="providerChart"></canvas></div>
     </div>
 </div>
 
 <div class="chart-grid">
     <div class="chart-card">
         <div class="chart-card-title"><i class="fas fa-chart-bar" style="color:var(--emerald);"></i> Department Usage</div>
-        <canvas id="deptChart"></canvas>
+        <div style="position:relative;height:240px;"><canvas id="deptChart"></canvas></div>
     </div>
     <div class="chart-card">
         <div class="chart-card-title"><i class="fas fa-chart-doughnut" style="color:var(--cyan);"></i> Success vs Failure</div>
-        <canvas id="successChart"></canvas>
+        <div style="position:relative;height:240px;"><canvas id="successChart"></canvas></div>
     </div>
 </div>
 
@@ -211,9 +243,18 @@ drawMiniSparkline('miniChart2', 'rgb(16, 185, 129)');
 
 // Daily Chart
 var dailyData = <?= json_encode($daily_volume) ?>;
-var labels = dailyData.map(function(d) { return d.date ? d.date.substring(5) : ''; });
-var sent = dailyData.map(function(d) { return parseInt(d.sent); });
-var failed = dailyData.map(function(d) { return parseInt(d.failed); });
+var skippedDailyData = <?= json_encode($skipped_recipient_daily) ?>;
+var hasDailyData = dailyData.length > 0;
+var labels = hasDailyData ? dailyData.map(function(d) { return d.date ? d.date.substring(5) : ''; }) : ['No Data'];
+var sent = hasDailyData ? dailyData.map(function(d) { return parseInt(d.sent); }) : [0];
+var failed = hasDailyData ? dailyData.map(function(d) { return parseInt(d.failed); }) : [0];
+var skipped = hasDailyData ? dailyData.map(function(d) {
+    var match = skippedDailyData.find(function(s) { return s.date === d.date; });
+    return match ? parseInt(match.skipped) : 0;
+}) : [0];
+var dailySentColor = hasDailyData ? '#3b82f6' : '#2a3040';
+var dailyFailedColor = hasDailyData ? '#ef4444' : 'transparent';
+var dailySkippedColor = hasDailyData ? '#f59e0b' : 'transparent';
 
 new Chart(document.getElementById('dailyChart'), {
     type: 'line',
@@ -224,29 +265,63 @@ new Chart(document.getElementById('dailyChart'), {
                 label: 'Sent',
                 data: sent,
                 borderColor: '#3b82f6',
-                backgroundColor: function(ctx) {
-                    var g = ctx.chart.ctx.createLinearGradient(0, 0, 0, 280);
-                    g.addColorStop(0, 'rgba(59, 130, 246, 0.2)');
+                backgroundColor: hasDailyData ? function(ctx) {
+                    var g = ctx.chart.ctx.createLinearGradient(0, 0, 0, 260);
+                    g.addColorStop(0, 'rgba(59, 130, 246, 0.25)');
+                    g.addColorStop(0.5, 'rgba(59, 130, 246, 0.10)');
                     g.addColorStop(1, 'rgba(59, 130, 246, 0)');
                     return g;
-                },
+                } : 'rgba(42,48,64,0.2)',
                 fill: true,
-                tension: 0.4,
-                pointRadius: 3,
-                pointHoverRadius: 6,
-                pointBackgroundColor: '#3b82f6'
+                tension: 0.35,
+                borderWidth: 2.5,
+                pointRadius: 0,
+                pointHoverRadius: 5,
+                pointHoverBackgroundColor: '#fff',
+                pointHoverBorderColor: '#3b82f6',
+                pointHoverBorderWidth: 2.5
             },
             {
                 label: 'Failed',
                 data: failed,
                 borderColor: '#ef4444',
-                backgroundColor: 'rgba(239, 68, 68, 0)',
-                fill: false,
-                tension: 0.4,
-                pointRadius: 3,
-                pointHoverRadius: 6,
-                pointBackgroundColor: '#ef4444',
-                borderDash: [5, 5]
+                backgroundColor: hasDailyData ? function(ctx) {
+                    var g = ctx.chart.ctx.createLinearGradient(0, 0, 0, 260);
+                    g.addColorStop(0, 'rgba(239, 68, 68, 0.18)');
+                    g.addColorStop(0.5, 'rgba(239, 68, 68, 0.06)');
+                    g.addColorStop(1, 'rgba(239, 68, 68, 0)');
+                    return g;
+                } : 'transparent',
+                fill: true,
+                tension: 0.35,
+                borderWidth: 2,
+                borderDash: [6, 3],
+                pointRadius: 0,
+                pointHoverRadius: 5,
+                pointHoverBackgroundColor: '#fff',
+                pointHoverBorderColor: '#ef4444',
+                pointHoverBorderWidth: 2.5
+            },
+            {
+                label: 'Skipped',
+                data: skipped,
+                borderColor: '#f59e0b',
+                backgroundColor: hasDailyData ? function(ctx) {
+                    var g = ctx.chart.ctx.createLinearGradient(0, 0, 0, 260);
+                    g.addColorStop(0, 'rgba(245, 158, 11, 0.15)');
+                    g.addColorStop(0.5, 'rgba(245, 158, 11, 0.05)');
+                    g.addColorStop(1, 'rgba(245, 158, 11, 0)');
+                    return g;
+                } : 'transparent',
+                fill: true,
+                tension: 0.35,
+                borderWidth: 2,
+                borderDash: [3, 3],
+                pointRadius: 0,
+                pointHoverRadius: 5,
+                pointHoverBackgroundColor: '#fff',
+                pointHoverBorderColor: '#f59e0b',
+                pointHoverBorderWidth: 2.5
             }
         ]
     },
@@ -254,24 +329,62 @@ new Chart(document.getElementById('dailyChart'), {
         responsive: true,
         maintainAspectRatio: false,
         plugins: {
-            legend: { position: 'top', labels: { boxWidth: 12, padding: 16 } }
+            legend: {
+                position: 'top',
+                labels: {
+                    boxWidth: 10,
+                    boxHeight: 10,
+                    borderRadius: 3,
+                    padding: 16,
+                    usePointStyle: true,
+                    pointStyle: 'circle',
+                    font: { size: 11 }
+                }
+            },
+            tooltip: {
+                backgroundColor: 'rgba(15,23,42,0.9)',
+                titleFont: { size: 11 },
+                bodyFont: { size: 12 },
+                padding: 10,
+                cornerRadius: 6,
+                displayColors: true,
+                boxPadding: 4
+            }
         },
         scales: {
-            y: { beginAtZero: true, grid: { color: 'rgba(42,48,64,0.5)' } },
-            x: { grid: { display: false } }
+            y: {
+                beginAtZero: true,
+                grid: { color: 'rgba(42,48,64,0.3)', drawBorder: false, lineWidth: 0.5 },
+                ticks: { font: { size: 10 }, color: '#64748b', maxTicksLimit: 6, padding: 8 }
+            },
+            x: {
+                grid: { display: false },
+                ticks: { font: { size: 10 }, color: '#64748b', maxTicksLimit: 10, maxRotation: 0 }
+            }
         },
-        interaction: { intersect: false, mode: 'index' }
+        interaction: { intersect: false, mode: 'nearest' },
+        hover: { mode: 'nearest', intersect: false }
     }
 });
 
 // Provider Chart
+var providerData = <?= json_encode($provider_usage) ?>;
+var provLabels, provValues;
+if (providerData.length) {
+    provLabels = providerData.map(function(d) { return d.smtp_host || d.sender_email || 'Unknown'; });
+    provValues = providerData.map(function(d) { return parseInt(d.email_count); });
+} else {
+    provLabels = ['No Activity Yet'];
+    provValues = [1];
+}
+var provColors = ['#0078d4', '#ea4335', '#3b82f6', '#10b981', '#f59e0b', '#8b5cf6', '#06b6d4', '#ef4444'];
 new Chart(document.getElementById('providerChart'), {
     type: 'doughnut',
     data: {
-        labels: ['Microsoft 365', 'Gmail', 'Custom SMTP'],
+        labels: provLabels,
         datasets: [{
-            data: [65, 20, 15],
-            backgroundColor: ['#0078d4', '#ea4335', '#3b82f6'],
+            data: provValues,
+            backgroundColor: provColors.slice(0, provLabels.length),
             borderWidth: 0
         }]
     },
@@ -287,6 +400,7 @@ new Chart(document.getElementById('providerChart'), {
 
 // Department Chart
 var deptData = <?= json_encode($top_departments) ?>;
+if (!deptData.length) { deptData = [{name: 'No Activity Yet', email_count: 1}]; }
 new Chart(document.getElementById('deptChart'), {
     type: 'bar',
     data: {
@@ -312,15 +426,18 @@ new Chart(document.getElementById('deptChart'), {
 });
 
 // Success vs Failure
-var totalSent = parseInt(<?= $stats['today_count'] ?>);
-var totalFailed = parseInt(<?= $stats['failed_count'] ?>);
+var dailyDataSF = <?= json_encode($daily_volume) ?>;
+var totalSent30 = dailyDataSF.reduce(function(sum, d) { return sum + parseInt(d.sent || 0); }, 0);
+var totalFailed30 = dailyDataSF.reduce(function(sum, d) { return sum + parseInt(d.failed || 0); }, 0);
+var totalSkipped30 = <?= $skipped30 ?>;
+var hasData = totalSent30 + totalFailed30 + totalSkipped30 > 0;
 new Chart(document.getElementById('successChart'), {
     type: 'doughnut',
     data: {
-        labels: ['Successful', 'Failed'],
+        labels: hasData ? ['Sent', 'Failed', 'Skipped'] : ['Awaiting Data'],
         datasets: [{
-            data: [totalSent + totalFailed > 0 ? totalSent : 100, totalFailed > 0 ? totalFailed : 0],
-            backgroundColor: ['#10b981', '#ef4444'],
+            data: hasData ? [totalSent30, totalFailed30, totalSkipped30] : [1],
+            backgroundColor: hasData ? ['#10b981', '#ef4444', '#f59e0b'] : ['#2a3040'],
             borderWidth: 0
         }]
     },

@@ -119,20 +119,33 @@ try {
 }
 
 $recipientArray = array_map('trim', explode(',', $to));
+
+// Filter out forbidden and suppressed recipients
+$suppression = new SuppressionCache();
+$validRecipients = [];
+$skippedRecipients = [];
+
 foreach ($recipientArray as $recipient) {
     if (in_array($recipient, $forbiddenEmails)) {
-        echo json_encode(['status' => false, 'message' => $recipient . ' is a Test/Wrong/Invalid Email Address']);
-        exit;
+        $skippedRecipients[] = ['email' => $recipient, 'reason' => 'forbidden'];
+    } elseif ($suppression->isSuppressed($recipient)) {
+        $skippedRecipients[] = ['email' => $recipient, 'reason' => 'suppressed'];
+    } else {
+        $validRecipients[] = $recipient;
     }
 }
 
-// Suppression check
-$suppression = new SuppressionCache();
-foreach ($recipientArray as $recipient) {
-    if ($suppression->isSuppressed($recipient)) {
-        echo json_encode(['status' => false, 'message' => "Recipient {$recipient} is suppressed due to previous delivery failures"]);
-        exit;
-    }
+$totalRequested = count($recipientArray);
+$totalValid = count($validRecipients);
+$totalSkipped = count($skippedRecipients);
+
+if ($totalValid === 0) {
+    $reason = $skippedRecipients[0]['reason'] ?? 'invalid';
+    $msg = $reason === 'forbidden'
+        ? $skippedRecipients[0]['email'] . ' is a Test/Wrong/Invalid Email Address'
+        : "Recipient {$skippedRecipients[0]['email']} is suppressed due to previous delivery failures";
+    echo json_encode(['status' => false, 'message' => $msg]);
+    exit;
 }
 
 // Get department and SMTP account
@@ -161,10 +174,11 @@ if (!empty($attachmentURL)) {
     ];
 }
 
-// Send email
+// Send email to valid recipients only
+$recipientsStr = implode(',', $validRecipients);
 $result = SmtpMailer::send(
     $smtpAccount,
-    $to,
+    $recipientsStr,
     $subject,
     $body,
     $from ?: null,
@@ -172,6 +186,17 @@ $result = SmtpMailer::send(
     $bcc,
     $attachments
 );
+
+// Build log message with skipped recipient details
+$errorMsg = $result['status'] ? null : ($result['message'] ?? null);
+if ($totalSkipped > 0) {
+    $skippedDetails = [];
+    foreach ($skippedRecipients as $sr) {
+        $skippedDetails[] = $sr['email'] . ' (' . $sr['reason'] . ')';
+    }
+    $skipNote = 'Skipped: ' . implode(', ', $skippedDetails);
+    $errorMsg = $errorMsg ? $errorMsg . ' | ' . $skipNote : $skipNote;
+}
 
 // Log the attempt
 try {
@@ -181,14 +206,24 @@ try {
         'security_key_id'  => $keyRecord['id'],
         'smtp_account_id'  => $smtpAccount['id'],
         'sender_email'     => $from ?: $smtpAccount['sender_email'],
-        'recipients'       => $to,
-        'recipient_count'  => count($recipientArray),
-        'subject'          => $subject,
+        'recipients'        => $recipientsStr,
+        'recipient_count'   => $totalValid,
+        'total_recipients'  => $totalRequested,
+        'subject'           => $subject,
         'source_ip'        => $_SERVER['REMOTE_ADDR'] ?? 'unknown',
         'request_path'     => $_SERVER['REQUEST_URI'] ?? '/api/send.php',
         'status'           => $result['status'] ? 'sent' : 'failed',
-        'error_message'    => $result['status'] ? null : ($result['message'] ?? null),
+        'error_message'    => $errorMsg,
     ]);
 } catch (Exception $e) {}
 
-echo json_encode($result);
+$responseMsg = $result['status'] ? 'Email sent successfully' : ($result['message'] ?? 'Failed');
+if ($totalSkipped > 0) {
+    $skippedNames = [];
+    foreach ($skippedRecipients as $sr) {
+        $skippedNames[] = $sr['email'];
+    }
+    $responseMsg .= '. Skipped (' . $totalSkipped . '): ' . implode(', ', $skippedNames);
+}
+
+echo json_encode(['status' => $result['status'], 'message' => $responseMsg]);

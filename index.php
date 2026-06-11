@@ -72,6 +72,13 @@ try {
         // column already exists
     }
 
+    // Auto-migration: add total_recipients column to email_logs
+    try {
+        $pdo->exec("ALTER TABLE `email_logs` ADD COLUMN `total_recipients` INT NULL DEFAULT NULL AFTER `recipient_count`");
+    } catch (PDOException $e) {
+        // column already exists
+    }
+
     $settings = new SystemSetting();
     $appSettings = $settings->getAllAsArray();
     date_default_timezone_set($appSettings['app_timezone'] ?? 'UTC');

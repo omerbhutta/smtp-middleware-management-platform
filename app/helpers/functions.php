@@ -97,6 +97,62 @@ function portalUrl()
     return $protocol . '://' . $_SERVER['HTTP_HOST'] . BASE_URL;
 }
 
+/**
+ * Parse email log recipients + error_message into an array with 'email' and 'status' (sent|forbidden|suppressed)
+ */
+function parseRecipientsWithStatus($recipientsStr, $errorMessage)
+{
+    $delivered = [];
+    if ($recipientsStr) {
+        foreach (array_map('trim', explode(',', $recipientsStr)) as $r) {
+            $delivered[strtolower($r)] = $r;
+        }
+    }
+
+    $skipped = [];
+    if ($errorMessage && preg_match('/Skipped:\s*(.+?)(?:$|\|)/i', $errorMessage, $m)) {
+        foreach (explode(',', $m[1]) as $part) {
+            $part = trim($part);
+            if (preg_match('/^(.+?)\s*\((.+?)\)$/', $part, $pm)) {
+                $email = trim($pm[1]);
+                $reason = trim($pm[2]);
+                $skipped[strtolower($email)] = ['email' => $email, 'reason' => $reason];
+            }
+        }
+    }
+
+    $result = [];
+    foreach ($delivered as $lower => $email) {
+        if (isset($skipped[$lower])) {
+            $result[] = ['email' => $email, 'status' => $skipped[$lower]['reason']];
+        } else {
+            $result[] = ['email' => $email, 'status' => 'sent'];
+        }
+    }
+    foreach ($skipped as $lower => $info) {
+        if (!isset($delivered[$lower])) {
+            $result[] = ['email' => $info['email'], 'status' => $info['reason']];
+        }
+    }
+    return $result;
+}
+
+function renderRecipientsHtml($recipientsStr, $errorMessage)
+{
+    $items = parseRecipientsWithStatus($recipientsStr, $errorMessage);
+    $html = '';
+    foreach ($items as $item) {
+        $isSkipped = $item['status'] !== 'sent';
+        $color = $isSkipped ? 'var(--red)' : 'var(--text-primary)';
+        $badge = $isSkipped ? ' <span class="badge-smm badge-smm-danger" style="font-size:0.6rem;">' . escape($item['status']) . '</span>' : '';
+        $style = $isSkipped ? 'text-decoration:line-through;' : '';
+        $html .= '<div style="color:' . $color . ';' . $style . 'font-size:0.82rem;white-space:nowrap;">'
+               . '<i class="fas fa-' . ($isSkipped ? 'times-circle' : 'check-circle') . '" style="margin-right:4px;font-size:0.65rem;"></i>'
+               . escape($item['email']) . $badge . '</div>';
+    }
+    return $html;
+}
+
 function activityEmailTemplate($title, $message)
 {
     global $app_name;

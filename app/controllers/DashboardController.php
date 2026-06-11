@@ -21,9 +21,19 @@ class DashboardController
             'active_keys'        => $securityKey->countActive(),
             'active_smtp'        => $smtpAccount->countActive(),
             'suppressed_count'   => $suppression->count(),
+            'skipped_count'      => $emailLog->getSkippedCount(),
+            'skipped_breakdown'  => $emailLog->getSkippedBreakdown(),
         ];
 
         $daily_volume = $emailLog->getDailyVolume(30);
+        $skipped_daily_volume = $emailLog->getSkippedDailyVolume(30);
+        $skipped_recipient_daily = $emailLog->getSkippedRecipientDailyVolume(30);
+        $top_departments = $emailLog->getTopDepartments();
+        $provider_usage = $smtpAccount->getUsageStats();
+        $week_pct = $emailLog->getWeeklyPercentChange();
+        $month_pct = $emailLog->getMonthlyPercentChange();
+        $failed_pct = $emailLog->getFailedPercentChange();
+        $skipped30 = $emailLog->getSkippedRecipientCount(30);
         $recent_activities = $emailLog->getAll([], 1, 10)['data'];
 
         $title = 'Dashboard';

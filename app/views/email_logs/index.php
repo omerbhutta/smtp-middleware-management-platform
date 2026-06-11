@@ -31,6 +31,7 @@
                         <th>Subject</th>
                         <th>Department</th>
                         <th>Sender</th>
+                        <th>API Key</th>
                         <th>Status</th>
                         <th>Date</th>
                         <th style="text-align:right;">Actions</th>
@@ -39,10 +40,27 @@
                 <tbody>
                     <?php foreach ($logs['data'] as $log): ?>
                     <tr>
-                        <td><strong><?= escape(truncate($log['recipients'] ?? 'N/A', 30)) ?></strong></td>
+                        <td>
+                            <?php
+                            $totalReq = $log['total_recipients'] ?? $log['recipient_count'];
+                            $delivered = $log['recipient_count'];
+                            $skippedCt = $totalReq - $delivered;
+                            ?>
+                            <div style="font-size:0.82rem;color:var(--text-primary);font-weight:600;">
+                                <?= $totalReq ?> recipient<?= $totalReq != 1 ? 's' : '' ?>
+                            </div>
+                            <div style="display:flex;gap:8px;margin-top:2px;">
+                                <span style="font-size:0.7rem;color:var(--emerald);"><i class="fas fa-check-circle" style="font-size:0.6rem;"></i> <?= $delivered ?> delivered</span>
+                                <?php if ($skippedCt > 0): ?>
+                                <span style="font-size:0.7rem;color:var(--red);"><i class="fas fa-times-circle" style="font-size:0.6rem;"></i> <?= $skippedCt ?> skipped</span>
+                                <?php endif; ?>
+                            </div>
+                            <div style="margin-top:4px;"><?= renderRecipientsHtml($log['recipients'] ?? '', $log['error_message'] ?? '') ?></div>
+                        </td>
                         <td><span style="color:var(--text-muted);font-size:0.85rem;"><?= escape(truncate($log['subject'] ?? 'N/A', 30)) ?></span></td>
                         <td><?= escape($log['department_name'] ?? '-') ?></td>
                         <td><span style="font-size:0.82rem;"><?= escape($log['sender_email'] ?? '-') ?></span></td>
+                        <td><code style="background:rgba(59,130,246,0.15);color:var(--blue-primary);font-size:0.75rem;padding:2px 6px;border-radius:4px;"><?php if ($log['api_key']): ?><?= escape(substr($log['api_key'], 0, 4)) ?>...<?= escape(substr($log['api_key'], -4)) ?><?php else: ?>-<?php endif; ?></code></td>
                         <td>
                             <span class="badge-smm badge-smm-<?= $log['status'] === 'sent' ? 'success' : 'danger' ?>">
                                 <?= $log['status'] === 'sent' ? '<i class="fas fa-check-circle"></i>' : '<i class="fas fa-times-circle"></i>' ?> <?= $log['status'] ?>
@@ -55,7 +73,7 @@
                     </tr>
                     <?php endforeach; ?>
                     <?php if (empty($logs['data'])): ?>
-                    <tr><td colspan="7"><div class="empty-state"><i class="fas fa-inbox"></i><h4>No Email Activity</h4><p>Logs will appear once emails are sent through the platform.</p></div></td></tr>
+                    <tr><td colspan="8"><div class="empty-state"><i class="fas fa-inbox"></i><h4>No Email Activity</h4><p>Logs will appear once emails are sent through the platform.</p></div></td></tr>
                     <?php endif; ?>
                 </tbody>
             </table>
