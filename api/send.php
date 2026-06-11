@@ -164,6 +164,27 @@ if (empty($smtpAccounts)) {
 
 $smtpAccount = $smtpAccounts[0];
 
+// If a custom from address is provided, try to match it to the correct SMTP account
+if (!empty($from)) {
+    foreach ($smtpAccounts as $sa) {
+        if (strcasecmp($sa['sender_email'], $from) === 0) {
+            $smtpAccount = $sa;
+            break;
+        }
+    }
+    // If no exact match, try matching by domain
+    if ($smtpAccount === $smtpAccounts[0]) {
+        $fromDomain = substr(strrchr($from, '@'), 1);
+        foreach ($smtpAccounts as $sa) {
+            $saDomain = substr(strrchr($sa['sender_email'], '@'), 1);
+            if (strcasecmp($saDomain, $fromDomain) === 0) {
+                $smtpAccount = $sa;
+                break;
+            }
+        }
+    }
+}
+
 // Prepare attachments
 $attachments = [];
 if (!empty($attachmentURL)) {
