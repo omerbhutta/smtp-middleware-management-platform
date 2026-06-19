@@ -112,6 +112,126 @@ class Auth
         session_destroy();
     }
 
+    public function getMicrosoftAuthUrl()
+    {
+        $clientId = $_ENV['MS_CLIENT_ID'] ?? '';
+        $tenant = $_ENV['MS_TENANT_ID'] ?? 'common';
+        $redirectUri = $_ENV['MS_REDIRECT_URI'] ?? (portalUrl() . 'auth/microsoft/callback');
+
+        if (empty($clientId)) {
+            return null;
+        }
+
+        $state = bin2hex(random_bytes(16));
+        $_SESSION['ms_oauth_state'] = $state;
+        return "https://login.microsoftonline.com/{$tenant}/oauth2/v2.0/authorize"
+            . "?client_id=" . urlencode($clientId)
+            . "&response_type=code"
+            . "&redirect_uri=" . urlencode($redirectUri)
+            . "&response_mode=query"
+            . "&scope=" . urlencode('openid profile email User.Read')
+            . "&state=" . urlencode($state);
+    }
+
+    public function handleMicrosoftCallback($code, $state)
+    {
+        // Verify state
+        if (!isset($_SESSION['ms_oauth_state']) || $state !== $_SESSION['ms_oauth_state']) {
+            unset($_SESSION['ms_oauth_state']);
+            return ['error' => 'Invalid state parameter. Please try again.'];
+        }
+        unset($_SESSION['ms_oauth_state']);
+
+        $clientId = $_ENV['MS_CLIENT_ID'] ?? '';
+        $clientSecret = $_ENV['MS_CLIENT_SECRET'] ?? '';
+        $tenant = $_ENV['MS_TENANT_ID'] ?? 'common';
+        $redirectUri = $_ENV['MS_REDIRECT_URI'] ?? (portalUrl() . 'auth/microsoft/callback');
+
+        if (empty($clientId) || empty($clientSecret)) {
+            return ['error' => 'Microsoft login is not configured. Contact an admin.'];
+        }
+
+        // Exchange code for token
+        $tokenUrl = "https://login.microsoftonline.com/{$tenant}/oauth2/v2.0/token";
+        $postData = [
+            'client_id' => $clientId,
+            'client_secret' => $clientSecret,
+            'code' => $code,
+            'redirect_uri' => $redirectUri,
+            'grant_type' => 'authorization_code',
+        ];
+
+        $ch = curl_init($tokenUrl);
+        curl_setopt_array($ch, [
+            CURLOPT_POST => true,
+            CURLOPT_POSTFIELDS => http_build_query($postData),
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_HTTPHEADER => ['Content-Type: application/x-www-form-urlencoded'],
+            CURLOPT_TIMEOUT => 30,
+            CURLOPT_SSL_VERIFYPEER => false,
+        ]);
+        $response = curl_exec($ch);
+        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        curl_close($ch);
+
+        if ($httpCode !== 200) {
+            return ['error' => 'Failed to authenticate with Microsoft. Please try again.'];
+        }
+
+        $tokenData = json_decode($response, true);
+        if (!isset($tokenData['access_token'])) {
+            return ['error' => 'Invalid token response from Microsoft.'];
+        }
+
+        // Get user info from Microsoft Graph
+        $ch = curl_init('https://graph.microsoft.com/v1.0/me');
+        curl_setopt_array($ch, [
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_HTTPHEADER => [
+                'Authorization: Bearer ' . $tokenData['access_token'],
+                'Content-Type: application/json',
+            ],
+            CURLOPT_TIMEOUT => 30,
+            CURLOPT_SSL_VERIFYPEER => false,
+        ]);
+        $userResponse = curl_exec($ch);
+        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        curl_close($ch);
+
+        if ($httpCode !== 200) {
+            return ['error' => 'Failed to get user information from Microsoft.'];
+        }
+
+        $msUser = json_decode($userResponse, true);
+        $email = $msUser['mail'] ?? $msUser['userPrincipalName'] ?? '';
+
+        if (empty($email)) {
+            return ['error' => 'Could not retrieve your email from Microsoft.'];
+        }
+
+        // Look up user by email
+        $user = $this->db->fetchOne(
+            "SELECT * FROM users WHERE email = :email AND status = 'active' LIMIT 1",
+            ['email' => $email]
+        );
+
+        if (!$user) {
+            return ['error' => 'Access denied — your email is not registered. Contact an admin.'];
+        }
+
+        // Update MS info
+        $avatar = $msUser['displayName'] ?? null;
+        $this->db->update('users', [
+            'ms_id' => $msUser['id'],
+            'full_name' => $avatar ?: $user['full_name'],
+        ], 'id = :id', ['id' => $user['id']]);
+
+        $this->completeLogin($user['id']);
+        $this->logLoginAttempt($user['id'], true);
+
+        return ['success' => true];
+    }
+
     private function logLoginAttempt($userId, $status)
     {
         try {

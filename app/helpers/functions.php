@@ -168,3 +168,30 @@ function activityEmailTemplate($title, $message)
         . '</div>'
         . '</div>';
 }
+
+function saveEnvSetting($key, $value)
+{
+    $envFile = BASE_PATH . '.env';
+    if (!file_exists($envFile)) {
+        return false;
+    }
+    $content = file_get_contents($envFile);
+    $lines = explode("\n", $content);
+    $found = false;
+    foreach ($lines as $i => $line) {
+        $trimmed = trim($line);
+        if ($trimmed === '' || str_starts_with($trimmed, '#')) continue;
+        $parts = explode('=', $trimmed, 2);
+        if (trim($parts[0]) === $key) {
+            $lines[$i] = $key . '=' . $value;
+            $found = true;
+            break;
+        }
+    }
+    if (!$found) {
+        $lines[] = $key . '=' . $value;
+    }
+    file_put_contents($envFile, implode("\n", $lines));
+    $_ENV[$key] = $value;
+    return true;
+}

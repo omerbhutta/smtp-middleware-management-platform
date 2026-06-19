@@ -95,4 +95,46 @@ class AuthController
         header('Location: ' . BASE_URL . 'auth/login');
         exit;
     }
+
+    public function microsoft()
+    {
+        $url = $this->auth->getMicrosoftAuthUrl();
+        if (!$url || str_starts_with($url, 'https://login.microsoftonline.com') === false) {
+            $error = 'Microsoft login is not configured. Contact an admin.';
+            $app_name = 'SMTP Management Platform';
+            ob_start();
+            include VIEW_PATH . 'auth/login.php';
+            $content = ob_get_clean();
+            include VIEW_PATH . 'layouts/auth.php';
+            return;
+        }
+        header('Location: ' . $url);
+        exit;
+    }
+
+    public function microsoftCallback()
+    {
+        $code = $_GET['code'] ?? '';
+        $state = $_GET['state'] ?? '';
+
+        if (empty($code)) {
+            header('Location: ' . BASE_URL . 'auth/login');
+            exit;
+        }
+
+        $result = $this->auth->handleMicrosoftCallback($code, $state);
+
+        if (!empty($result['error'])) {
+            $error = $result['error'];
+            $app_name = 'SMTP Management Platform';
+            ob_start();
+            include VIEW_PATH . 'auth/login.php';
+            $content = ob_get_clean();
+            include VIEW_PATH . 'layouts/auth.php';
+            return;
+        }
+
+        header('Location: ' . BASE_URL . 'dashboard');
+        exit;
+    }
 }

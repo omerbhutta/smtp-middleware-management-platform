@@ -1,6 +1,6 @@
 # SMTP Management Platform
 
-A web-based SMTP middleware management system with department-based security keys, suppression management, analytics, audit trails, and MFA authentication.
+A web-based SMTP middleware management system with department-based security keys, suppression management, analytics, audit trails, MFA authentication, Microsoft OAuth2 login, and self-update capabilities.
 
 ## Requirements
 
@@ -17,27 +17,17 @@ A web-based SMTP middleware management system with department-based security key
    cd smtp-management-platform
    ```
 
-2. Copy `.env.example` to `.env` and configure your database credentials:
-   ```
-   cp .env.example .env
-   ```
-   Edit `.env` with your database host, username, password, and database name.
+2. Point your web server to the project directory. Apache users: ensure `.htaccess` is enabled (`AllowOverride All`).
 
-3. Point your web server to the project directory. Apache users: ensure `.htaccess` is enabled (`AllowOverride All`).
-
-4. Open the application in your browser. You will be redirected to the installer:
+3. Open the application in your browser. You will be redirected to the installer:
    ```
-   https://yourdomain.com/install
+   https://yourdomain.com/
    ```
 
-5. Follow the installer steps:
+4. Follow the installer steps:
    - **Step 1**: Enter database credentials and run the schema migration
    - **Step 2**: Create the admin user account
    - **Step 3**: Login with your new credentials
-
-## Default Security Keys
-
-The installer creates two legacy security keys for backward compatibility with existing systems. These are stored in the database and can be managed via the **Security Keys** section in the admin panel.
 
 ## Quick Start
 
@@ -46,6 +36,29 @@ The installer creates two legacy security keys for backward compatibility with e
 3. **Security Keys** → Generate API keys tied to each department
 4. **SMTP Accounts** → Add your SMTP provider credentials
 5. **API Endpoint** → Use `https://yourdomain.com/api/send` to send emails
+
+## Microsoft OAuth2 Login
+
+Users can sign in with their Microsoft work/school accounts instead of using a username/password.
+
+### Configuration
+
+1. Go to **Azure Portal → App registrations → New registration**
+2. Set the Redirect URI to `https://yourdomain.com/auth/microsoft/callback`
+3. Note the **Application (client) ID** and generate a **Client Secret**
+4. Navigate to **Users → Edit User → Microsoft Login Configuration**
+5. Enter your Client ID, Client Secret, Tenant ID (`common` for multi-tenant), and Redirect URI
+6. Click **Save MS Settings**
+
+Users must have a matching email in the system — their Microsoft email must match an existing user account in the platform. When they click **Sign in with Microsoft** on the login page, they'll be authenticated via OAuth2 and logged in automatically.
+
+## Self Update
+
+The platform includes a built-in self-update feature accessible from the sidebar under **System → Self Update**.
+
+- **Pull Latest**: Runs `git fetch` and `git pull` to update to the latest commit
+- **Full Update**: Runs fetch + pull and notes that auto-migrations run on next page load
+- All update attempts are logged in the **deploy_logs** table with status, output, and user attribution
 
 ## API Usage
 

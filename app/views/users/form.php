@@ -43,3 +43,49 @@
         </form>
     </div>
 </div>
+
+<?php if ($edit_mode): ?>
+<div class="card-smm animate-fade-up mt-4">
+    <div class="card-smm-header">
+        <h3><i class="fab fa-microsoft me-2" style="color:var(--blue-primary);"></i> Microsoft Login Configuration</h3>
+    </div>
+    <div class="card-smm-body">
+        <?php if (!empty($user['ms_id'])): ?>
+        <div class="alert-smm" style="background:rgba(16,185,129,0.1);border:1px solid rgba(16,185,129,0.2);color:var(--green);margin-bottom:16px;">
+            <i class="fas fa-link"></i>
+            <div>This account is linked to Microsoft ID: <code><?= escape($user['ms_id']) ?></code></div>
+        </div>
+        <?php endif; ?>
+
+        <form method="POST" action="users/edit?id=<?= $user['id'] ?>">
+            <input type="hidden" name="update_ms_settings" value="1">
+            <p style="color:var(--text-muted);font-size:0.85rem;margin-bottom:16px;">
+                Configure Microsoft OAuth 2.0 app credentials. Users will be able to sign in using their Microsoft work/school accounts.
+            </p>
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label class="form-label-smm">Client ID <span style="color:var(--text-muted);font-weight:400;">(Application ID)</span></label>
+                    <input type="text" name="ms_client_id" class="form-control-smm" value="<?= escape($_ENV['MS_CLIENT_ID'] ?? '') ?>" placeholder="e.g. 12345678-1234-1234-1234-123456789abc">
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label-smm">Client Secret</label>
+                    <input type="password" name="ms_client_secret" class="form-control-smm" value="<?= escape($_ENV['MS_CLIENT_SECRET'] ?? '') ?>" placeholder="Enter a strong client secret">
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label-smm">Tenant ID</label>
+                    <input type="text" name="ms_tenant_id" class="form-control-smm" value="<?= escape($_ENV['MS_TENANT_ID'] ?? 'common') ?>" placeholder="common or your tenant/directory ID">
+                    <small style="color:var(--text-muted);font-size:0.7rem;">Use <code>common</code> for multi-tenant or your specific tenant ID.</small>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label-smm">Redirect URI</label>
+                    <input type="text" name="ms_redirect_uri" class="form-control-smm" value="<?= escape($_ENV['MS_REDIRECT_URI'] ?? (portalUrl() . 'auth/microsoft/callback')) ?>">
+                    <small style="color:var(--text-muted);font-size:0.7rem;">Must match the redirect URI configured in your Azure app registration.</small>
+                </div>
+            </div>
+            <div class="mt-3">
+                <button type="submit" class="btn-smm btn-smm-primary"><i class="fas fa-save me-1"></i> Save MS Settings</button>
+            </div>
+        </form>
+    </div>
+</div>
+<?php endif; ?>

@@ -69,6 +69,11 @@
                 <a href="help" class="nav-link-smm <?= $active_menu === 'help' ? 'active' : '' ?>">
                     <i class="fas fa-question-circle"></i> <span class="sidebar-text">Documentation</span>
                 </a>
+
+                <div class="sidebar-section sidebar-text mt-3">System</div>
+                <a href="self_update" class="nav-link-smm <?= $active_menu === 'self_update' ? 'active' : '' ?>">
+                    <i class="fas fa-arrow-up-circle"></i> <span class="sidebar-text">Self Update</span>
+                </a>
             </nav>
         </div>
 

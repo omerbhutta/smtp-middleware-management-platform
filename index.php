@@ -79,6 +79,30 @@ try {
         // column already exists
     }
 
+    // Auto-migration: add ms_id column for Microsoft login
+    try {
+        $pdo->exec("ALTER TABLE `users` ADD COLUMN `ms_id` VARCHAR(255) NULL DEFAULT NULL AFTER `id`");
+    } catch (PDOException $e) {
+        // column already exists
+    }
+
+    // Auto-migration: create deploy_logs table
+    try {
+        $pdo->exec("CREATE TABLE IF NOT EXISTS `deploy_logs` (
+            `id` INT AUTO_INCREMENT PRIMARY KEY,
+            `user_id` INT NULL,
+            `action` VARCHAR(100) NOT NULL,
+            `branch` VARCHAR(255) NULL,
+            `previous_commit` VARCHAR(255) NULL,
+            `output` LONGTEXT NULL,
+            `status` VARCHAR(50) NOT NULL DEFAULT 'running',
+            `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
+    } catch (PDOException $e) {
+        // table already exists
+    }
+
     $settings = new SystemSetting();
     $appSettings = $settings->getAllAsArray();
     date_default_timezone_set($appSettings['app_timezone'] ?? 'UTC');
@@ -111,7 +135,14 @@ $route = $_GET['route'] ?? 'dashboard';
 $routeParts = explode('/', $route);
 
 $controllerRoute = $routeParts[0];
-$action = $routeParts[1] ?? 'index';
+if (isset($routeParts[1])) {
+    $action = $routeParts[1];
+    for ($i = 2; $i < count($routeParts); $i++) {
+        $action .= ucfirst($routeParts[$i]);
+    }
+} else {
+    $action = 'index';
+}
 
 $controllerName = implode('', array_map('ucfirst', explode('_', $controllerRoute))) . 'Controller';
 
