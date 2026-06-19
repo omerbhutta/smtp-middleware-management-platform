@@ -7,7 +7,10 @@ class DepartmentsController
         $auth->requireAdmin();
 
         $deptModel = new Department();
-        $departments = $deptModel->getAll();
+        $search = $_GET['search'] ?? '';
+        $sort = $_GET['sort'] ?? 'created_at';
+        $order = $_GET['order'] ?? 'DESC';
+        $departments = $deptModel->getAll(null, null, $search, $sort, $order);
 
         $title = 'Departments';
         $active_menu = 'departments';

@@ -7,7 +7,10 @@ class SecurityKeysController
         $auth->requireAdmin();
 
         $keyModel = new SecurityKey();
-        $keys = $keyModel->getAll();
+        $search = $_GET['search'] ?? '';
+        $sort = $_GET['sort'] ?? 'created_at';
+        $order = $_GET['order'] ?? 'DESC';
+        $keys = $keyModel->getAll(null, $search, $sort, $order);
 
         $title = 'Security Keys';
         $active_menu = 'security_keys';

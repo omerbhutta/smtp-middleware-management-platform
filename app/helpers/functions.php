@@ -195,3 +195,27 @@ function saveEnvSetting($key, $value)
     $_ENV[$key] = $value;
     return true;
 }
+
+function sortUrl($column, $sort, $order)
+{
+    $params = $_GET;
+    $params['sort'] = $column;
+    $params['order'] = ($sort === $column && $order === 'asc') ? 'desc' : 'asc';
+    return '?' . http_build_query($params);
+}
+
+function sortIcon($column, $sort, $order)
+{
+    if ($sort !== $column) {
+        return '<i class="fas fa-sort" style="opacity:0.3;font-size:0.7rem;margin-left:4px;"></i>';
+    }
+    $icon = $order === 'asc' ? 'fa-sort-up' : 'fa-sort-down';
+    return '<i class="fas ' . $icon . '" style="font-size:0.7rem;margin-left:4px;"></i>';
+}
+
+function buildSortSql($sort, $order, $allowedColumns, $defaultSort = 'created_at', $defaultOrder = 'DESC')
+{
+    $sort = in_array($sort, $allowedColumns) ? $sort : $defaultSort;
+    $order = strtoupper($order) === 'ASC' ? 'ASC' : ($order === 'DESC' ? 'DESC' : $defaultOrder);
+    return " ORDER BY {$sort} {$order}";
+}

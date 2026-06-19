@@ -8,7 +8,7 @@ class Department
         $this->db = Database::getInstance();
     }
 
-    public function getAll($status = null, $departmentId = null)
+    public function getAll($status = null, $departmentId = null, $search = '', $sort = 'created_at', $order = 'DESC')
     {
         $sql = "SELECT d.*, (SELECT COUNT(*) FROM security_keys WHERE department_id = d.id) as key_count,
                 (SELECT COUNT(*) FROM smtp_accounts WHERE department_id = d.id) as smtp_count
@@ -23,10 +23,18 @@ class Department
             $conditions[] = "d.id = :dept_id";
             $params['dept_id'] = $departmentId;
         }
+        if ($search) {
+            $conditions[] = "(d.name LIKE :search OR d.description LIKE :search2)";
+            $params['search'] = "%{$search}%";
+            $params['search2'] = "%{$search}%";
+        }
         if ($conditions) {
             $sql .= " WHERE " . implode(' AND ', $conditions);
         }
-        $sql .= " ORDER BY d.created_at DESC";
+        $allowed = ['name', 'status', 'key_count', 'smtp_count', 'created_at'];
+        $sort = in_array($sort, $allowed) ? $sort : 'created_at';
+        $order = strtoupper($order) === 'ASC' ? 'ASC' : 'DESC';
+        $sql .= " ORDER BY {$sort} {$order}";
         return $this->db->fetchAll($sql, $params);
     }
 

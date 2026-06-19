@@ -8,16 +8,31 @@ class SmtpAccount
         $this->db = Database::getInstance();
     }
 
-    public function getAll($departmentId = null)
+    public function getAll($departmentId = null, $search = '', $sort = 'created_at', $order = 'DESC')
     {
         $sql = "SELECT sa.*, d.name as department_name FROM smtp_accounts sa
                 LEFT JOIN departments d ON sa.department_id = d.id";
         $params = [];
+        $conditions = [];
         if ($departmentId) {
-            $sql .= " WHERE sa.department_id = :dept_id";
+            $conditions[] = "sa.department_id = :dept_id";
             $params['dept_id'] = $departmentId;
         }
-        $sql .= " ORDER BY sa.created_at DESC";
+        if ($search) {
+            $conditions[] = "(sa.sender_email LIKE :search OR sa.smtp_host LIKE :search2 OR sa.provider_type LIKE :search3 OR d.name LIKE :search4)";
+            $params['search'] = "%{$search}%";
+            $params['search2'] = "%{$search}%";
+            $params['search3'] = "%{$search}%";
+            $params['search4'] = "%{$search}%";
+        }
+        if ($conditions) {
+            $sql .= " WHERE " . implode(' AND ', $conditions);
+        }
+        $allowed = ['sender_email', 'smtp_host', 'smtp_port', 'provider_type', 'encryption', 'status', 'department_name', 'created_at'];
+        $sort = in_array($sort, $allowed) ? $sort : 'created_at';
+        $order = strtoupper($order) === 'ASC' ? 'ASC' : 'DESC';
+        if ($sort === 'department_name') $sort = 'd.name';
+        $sql .= " ORDER BY {$sort} {$order}";
         return $this->db->fetchAll($sql, $params);
     }
 

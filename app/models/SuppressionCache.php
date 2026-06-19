@@ -8,15 +8,34 @@ class SuppressionCache
         $this->db = Database::getInstance();
     }
 
-    public function getAll($page = 1, $perPage = 50)
+    public function getAll($page = 1, $perPage = 50, $search = '', $sort = 'created_at', $order = 'DESC')
     {
-        $total = $this->db->fetchOne("SELECT COUNT(*) as total FROM suppression_cache", [])['total'];
+        $countSql = "SELECT COUNT(*) as total FROM suppression_cache";
+        $countParams = [];
+        if ($search) {
+            $countSql .= " WHERE email LIKE :search OR reason LIKE :search2 OR source LIKE :search3";
+            $countParams['search'] = "%{$search}%";
+            $countParams['search2'] = "%{$search}%";
+            $countParams['search3'] = "%{$search}%";
+        }
+        $total = $this->db->fetchOne($countSql, $countParams)['total'];
         $offset = ($page - 1) * $perPage;
 
-        $data = $this->db->fetchAll(
-            "SELECT * FROM suppression_cache ORDER BY created_at DESC LIMIT :limit OFFSET :offset",
-            ['limit' => $perPage, 'offset' => $offset]
-        );
+        $dataSql = "SELECT * FROM suppression_cache";
+        $dataParams = [];
+        if ($search) {
+            $dataSql .= " WHERE email LIKE :search OR reason LIKE :search2 OR source LIKE :search3";
+            $dataParams['search'] = "%{$search}%";
+            $dataParams['search2'] = "%{$search}%";
+            $dataParams['search3'] = "%{$search}%";
+        }
+        $allowed = ['email', 'reason', 'source', 'created_at'];
+        $sort = in_array($sort, $allowed) ? $sort : 'created_at';
+        $order = strtoupper($order) === 'ASC' ? 'ASC' : 'DESC';
+        $dataSql .= " ORDER BY {$sort} {$order} LIMIT :limit OFFSET :offset";
+        $dataParams['limit'] = $perPage;
+        $dataParams['offset'] = $offset;
+        $data = $this->db->fetchAll($dataSql, $dataParams);
 
         return [
             'data'        => $data,

@@ -8,7 +8,10 @@ class SuppressionController
 
         $suppression = new SuppressionCache();
         $page = $_GET['page'] ?? 1;
-        $suppressions = $suppression->getAll((int)$page, 50);
+        $search = $_GET['search'] ?? '';
+        $sort = $_GET['sort'] ?? 'created_at';
+        $order = $_GET['order'] ?? 'DESC';
+        $suppressions = $suppression->getAll((int)$page, 50, $search, $sort, $order);
 
         $title = 'Suppression List';
         $active_menu = 'suppression';

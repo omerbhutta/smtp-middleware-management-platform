@@ -3,17 +3,26 @@
         <h3><i class="fas fa-users me-2" style="color:var(--blue-primary);"></i> All Users</h3>
         <a href="users/create" class="btn-smm btn-smm-primary btn-smm-sm"><i class="fas fa-plus"></i> New User</a>
     </div>
-    <div class="card-smm-body p-0">
+    <div class="card-smm-body">
+        <form method="GET" action="index.php" class="filter-bar mb-3">
+            <input type="hidden" name="route" value="users">
+            <input type="text" name="search" class="form-control-smm" placeholder="Search users..." value="<?= escape($_GET['search'] ?? '') ?>" style="min-width:200px;">
+            <button type="submit" class="btn-smm btn-smm-primary btn-smm-sm"><i class="fas fa-search"></i></button>
+            <?php if (!empty($_GET['search']) || !empty($_GET['sort'])): ?>
+            <a href="?route=users" class="btn-smm btn-smm-secondary btn-smm-sm"><i class="fas fa-times"></i></a>
+            <?php endif; ?>
+        </form>
         <div style="overflow-x:auto;">
             <table class="table-modern">
                 <thead>
                     <tr>
-                        <th>Name</th>
-                        <th>Username</th>
-                        <th>Email</th>
-                        <th>Status</th>
-                        <th>MFA</th>
-                        <th>Last Login</th>
+                        <th><a href="<?= sortUrl('full_name', $_GET['sort'] ?? '', $_GET['order'] ?? '') ?>" class="sort-link">Name <?= sortIcon('full_name', $_GET['sort'] ?? '', $_GET['order'] ?? '') ?></a></th>
+                        <th><a href="<?= sortUrl('username', $_GET['sort'] ?? '', $_GET['order'] ?? '') ?>" class="sort-link">Username <?= sortIcon('username', $_GET['sort'] ?? '', $_GET['order'] ?? '') ?></a></th>
+                        <th><a href="<?= sortUrl('email', $_GET['sort'] ?? '', $_GET['order'] ?? '') ?>" class="sort-link">Email <?= sortIcon('email', $_GET['sort'] ?? '', $_GET['order'] ?? '') ?></a></th>
+                        <th><a href="<?= sortUrl('role', $_GET['sort'] ?? '', $_GET['order'] ?? '') ?>" class="sort-link">Role <?= sortIcon('role', $_GET['sort'] ?? '', $_GET['order'] ?? '') ?></a></th>
+                        <th><a href="<?= sortUrl('status', $_GET['sort'] ?? '', $_GET['order'] ?? '') ?>" class="sort-link">Status <?= sortIcon('status', $_GET['sort'] ?? '', $_GET['order'] ?? '') ?></a></th>
+                        <th><a href="<?= sortUrl('mfa_enabled', $_GET['sort'] ?? '', $_GET['order'] ?? '') ?>" class="sort-link">MFA <?= sortIcon('mfa_enabled', $_GET['sort'] ?? '', $_GET['order'] ?? '') ?></a></th>
+                        <th><a href="<?= sortUrl('last_login', $_GET['sort'] ?? '', $_GET['order'] ?? '') ?>" class="sort-link">Last Login <?= sortIcon('last_login', $_GET['sort'] ?? '', $_GET['order'] ?? '') ?></a></th>
                         <th style="text-align:right;">Actions</th>
                     </tr>
                 </thead>
@@ -30,6 +39,11 @@
                         </td>
                         <td><span style="color:var(--text-muted);font-size:0.82rem;"><?= escape($user['username']) ?></span></td>
                         <td><?= escape($user['email']) ?></td>
+                        <td>
+                            <span class="badge-smm badge-smm-<?= $user['role'] === 'admin' ? 'warning' : 'info' ?>">
+                                <?= escape($user['role']) ?>
+                            </span>
+                        </td>
                         <td>
                             <span class="badge-smm badge-smm-<?= $user['status'] === 'active' ? 'success' : 'danger' ?>">
                                 <?= $user['status'] ?>
@@ -50,7 +64,7 @@
                     </tr>
                     <?php endforeach; ?>
                     <?php if (empty($users)): ?>
-                    <tr><td colspan="8"><div class="empty-state"><i class="fas fa-users"></i><h4>No Users Found</h4><p>Create your first user to get started.</p></div></td></tr>
+                    <tr><td colspan="9"><div class="empty-state"><i class="fas fa-users"></i><h4>No Users Found</h4><p>Create your first user to get started.</p></div></td></tr>
                     <?php endif; ?>
                 </tbody>
             </table>

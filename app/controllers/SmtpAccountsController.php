@@ -7,7 +7,10 @@ class SmtpAccountsController
         $auth->requireAdmin();
 
         $smtpModel = new SmtpAccount();
-        $accounts = $smtpModel->getAll();
+        $search = $_GET['search'] ?? '';
+        $sort = $_GET['sort'] ?? 'created_at';
+        $order = $_GET['order'] ?? 'DESC';
+        $accounts = $smtpModel->getAll(null, $search, $sort, $order);
 
         $title = 'SMTP Accounts';
         $active_menu = 'smtp_accounts';

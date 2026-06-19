@@ -8,16 +8,29 @@ class SecurityKey
         $this->db = Database::getInstance();
     }
 
-    public function getAll($departmentId = null)
+    public function getAll($departmentId = null, $search = '', $sort = 'created_at', $order = 'DESC')
     {
         $sql = "SELECT sk.*, d.name as department_name FROM security_keys sk
                 LEFT JOIN departments d ON sk.department_id = d.id";
         $params = [];
+        $conditions = [];
         if ($departmentId) {
-            $sql .= " WHERE sk.department_id = :dept_id";
+            $conditions[] = "sk.department_id = :dept_id";
             $params['dept_id'] = $departmentId;
         }
-        $sql .= " ORDER BY sk.created_at DESC";
+        if ($search) {
+            $conditions[] = "(d.name LIKE :search OR sk.api_key LIKE :search2)";
+            $params['search'] = "%{$search}%";
+            $params['search2'] = "%{$search}%";
+        }
+        if ($conditions) {
+            $sql .= " WHERE " . implode(' AND ', $conditions);
+        }
+        $allowed = ['department_name', 'status', 'usage_count', 'last_usage', 'created_at'];
+        $sort = in_array($sort, $allowed) ? $sort : 'created_at';
+        $order = strtoupper($order) === 'ASC' ? 'ASC' : 'DESC';
+        if ($sort === 'department_name') $sort = 'd.name';
+        $sql .= " ORDER BY {$sort} {$order}";
         return $this->db->fetchAll($sql, $params);
     }
 

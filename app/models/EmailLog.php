@@ -8,7 +8,7 @@ class EmailLog
         $this->db = Database::getInstance();
     }
 
-    public function getAll($filters = [], $page = 1, $perPage = 50)
+    public function getAll($filters = [], $page = 1, $perPage = 50, $sort = 'created_at', $order = 'DESC')
     {
         $sql = "SELECT el.*, d.name as department_name, sa.sender_email as smtp_sender, sk.api_key
                 FROM email_logs el
@@ -47,7 +47,12 @@ class EmailLog
         $total = $this->db->fetchOne($countSql, $params)['total'];
 
         $offset = ($page - 1) * $perPage;
-        $sql .= " ORDER BY el.created_at DESC LIMIT :limit OFFSET :offset";
+        $allowed = ['recipients', 'subject', 'department_name', 'sender_email', 'status', 'created_at'];
+        $sort = in_array($sort, $allowed) ? $sort : 'created_at';
+        $order = strtoupper($order) === 'ASC' ? 'ASC' : 'DESC';
+        if ($sort === 'department_name') $sort = 'd.name';
+        if ($sort === 'sender_email') $sort = 'el.sender_email';
+        $sql .= " ORDER BY {$sort} {$order} LIMIT :limit OFFSET :offset";
         $params['limit'] = $perPage;
         $params['offset'] = $offset;
 

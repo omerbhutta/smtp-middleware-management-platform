@@ -7,7 +7,10 @@ class UsersController
         $auth->requireAdmin();
 
         $userModel = new User();
-        $users = $userModel->getAll();
+        $search = $_GET['search'] ?? '';
+        $sort = $_GET['sort'] ?? 'created_at';
+        $order = $_GET['order'] ?? 'DESC';
+        $users = $userModel->getAll(null, null, $search, $sort, $order);
 
         $title = 'Users';
         $active_menu = 'users';

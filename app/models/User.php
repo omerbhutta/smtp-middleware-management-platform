@@ -13,7 +13,7 @@ class User
         return $this->db->fetchAll("SELECT id, username, full_name, email FROM users WHERE status = 'active' ORDER BY full_name ASC");
     }
 
-    public function getAll($status = null, $departmentId = null)
+    public function getAll($status = null, $departmentId = null, $search = '', $sort = 'created_at', $order = 'DESC')
     {
         $sql = "SELECT u.*, d.name as department_name FROM users u
                 LEFT JOIN departments d ON u.department_id = d.id";
@@ -27,10 +27,19 @@ class User
             $conditions[] = "u.department_id = :dept_id";
             $params['dept_id'] = $departmentId;
         }
+        if ($search) {
+            $conditions[] = "(u.full_name LIKE :search OR u.username LIKE :search2 OR u.email LIKE :search3)";
+            $params['search'] = "%{$search}%";
+            $params['search2'] = "%{$search}%";
+            $params['search3'] = "%{$search}%";
+        }
         if ($conditions) {
             $sql .= " WHERE " . implode(' AND ', $conditions);
         }
-        $sql .= " ORDER BY u.created_at DESC";
+        $allowed = ['full_name', 'username', 'email', 'role', 'status', 'mfa_enabled', 'last_login', 'created_at'];
+        $sort = in_array($sort, $allowed) ? $sort : 'created_at';
+        $order = strtoupper($order) === 'ASC' ? 'ASC' : 'DESC';
+        $sql .= " ORDER BY {$sort} {$order}";
         return $this->db->fetchAll($sql, $params);
     }
 

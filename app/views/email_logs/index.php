@@ -27,13 +27,13 @@
             <table class="table-modern">
                 <thead>
                     <tr>
-                        <th>Recipients</th>
-                        <th>Subject</th>
-                        <th>Department</th>
-                        <th>Sender</th>
+                        <th><a href="<?= sortUrl('recipients', $_GET['sort'] ?? '', $_GET['order'] ?? '') ?>" class="sort-link">Recipients <?= sortIcon('recipients', $_GET['sort'] ?? '', $_GET['order'] ?? '') ?></a></th>
+                        <th><a href="<?= sortUrl('subject', $_GET['sort'] ?? '', $_GET['order'] ?? '') ?>" class="sort-link">Subject <?= sortIcon('subject', $_GET['sort'] ?? '', $_GET['order'] ?? '') ?></a></th>
+                        <th><a href="<?= sortUrl('department_name', $_GET['sort'] ?? '', $_GET['order'] ?? '') ?>" class="sort-link">Department <?= sortIcon('department_name', $_GET['sort'] ?? '', $_GET['order'] ?? '') ?></a></th>
+                        <th><a href="<?= sortUrl('sender_email', $_GET['sort'] ?? '', $_GET['order'] ?? '') ?>" class="sort-link">Sender <?= sortIcon('sender_email', $_GET['sort'] ?? '', $_GET['order'] ?? '') ?></a></th>
                         <th>API Key</th>
-                        <th>Status</th>
-                        <th>Date</th>
+                        <th><a href="<?= sortUrl('status', $_GET['sort'] ?? '', $_GET['order'] ?? '') ?>" class="sort-link">Status <?= sortIcon('status', $_GET['sort'] ?? '', $_GET['order'] ?? '') ?></a></th>
+                        <th><a href="<?= sortUrl('created_at', $_GET['sort'] ?? '', $_GET['order'] ?? '') ?>" class="sort-link">Date <?= sortIcon('created_at', $_GET['sort'] ?? '', $_GET['order'] ?? '') ?></a></th>
                         <th style="text-align:right;">Actions</th>
                     </tr>
                 </thead>

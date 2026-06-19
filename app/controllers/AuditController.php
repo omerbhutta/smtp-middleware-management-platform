@@ -8,9 +8,12 @@ class AuditController
 
         $auditModel = new AuditLog();
         $page = $_GET['page'] ?? 1;
-        $audits = $auditModel->getAll((int)$page, 50);
+        $search = $_GET['search'] ?? '';
+        $sort = $_GET['sort'] ?? 'created_at';
+        $order = $_GET['order'] ?? 'DESC';
+        $audits = $auditModel->getAll((int)$page, 50, $search, $sort, $order);
 
-        $title = 'Audit Trail';
+        $title = 'Audit Logs';
         $active_menu = 'audit';
         $app_name = 'SMTP Management Platform';
         $app_version = '1.0.0';

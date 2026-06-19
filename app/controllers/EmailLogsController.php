@@ -18,7 +18,9 @@ class EmailLogsController
             'search'         => $_GET['search'] ?? '',
         ];
 
-        $logs = $logModel->getAll($filters, (int)$page, 50);
+        $sort = $_GET['sort'] ?? 'created_at';
+        $order = $_GET['order'] ?? 'DESC';
+        $logs = $logModel->getAll($filters, (int)$page, 50, $sort, $order);
 
         $deptModel = new Department();
         $departments = $deptModel->getAll('active');
