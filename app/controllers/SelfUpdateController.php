@@ -123,59 +123,45 @@ class SelfUpdateController
         $auth->requireAdmin();
 
         header('Content-Type: application/json');
-        $repoPath = BASE_PATH;
-        $output = '';
 
-        try {
-            $result = $this->runGit(['rev-parse', '--abbrev-ref', 'HEAD']);
-            if ($result['exitCode'] !== 0) {
-                throw new Exception('Failed to get current branch: ' . ($result['stderr'] ?: 'unknown error'));
-            }
-            $currentBranch = $result['stdout'];
+        $logModel = new DeployLog();
+        $logId = $logModel->create([
+            'action' => 'self_update',
+            'branch' => '',
+            'previous_commit' => '',
+            'status' => 'running',
+            'user_id' => $_SESSION['user_id'] ?? 0,
+        ]);
+        $logModel->update($logId, ['status' => 'running']);
 
-            $result = $this->runGit(['log', '-1', '--format=%h | %ci']);
-            $oldCommit = $result['exitCode'] === 0 ? $result['stdout'] : 'Unknown';
+        $phpBin = PHP_BINARY ?: 'php';
+        $worker = escapeshellarg(BASE_PATH . 'update_worker.php');
+        $action = 'pull';
+        $uid = (int)($_SESSION['user_id'] ?? 0);
+        $cmd = "{$phpBin} {$worker} {$action} {$uid}";
+        $result = shell_exec($cmd);
 
-            $logModel = new DeployLog();
-            $logId = $logModel->create([
-                'action' => 'self_update',
-                'branch' => $currentBranch,
-                'previous_commit' => $oldCommit,
-                'status' => 'running',
-                'user_id' => $_SESSION['user_id'] ?? 0,
-            ]);
-
-            $fetch = $this->runGit(['fetch', 'origin']);
-            $output .= "> git fetch origin\n" . $fetch['stdout'] . "\n" . $fetch['stderr'] . "\n";
-
-            $pull = $this->runGit(['pull', 'origin', $currentBranch]);
-            $output .= "> git pull origin {$currentBranch}\n" . $pull['stdout'] . "\n" . $pull['stderr'] . "\n";
-
-            $result = $this->runGit(['log', '-1', '--format=%h | %ci']);
-            $newCommit = $result['exitCode'] === 0 ? $result['stdout'] : 'Unknown';
-
-            $success = $fetch['exitCode'] === 0 && $pull['exitCode'] === 0;
-
-            $logModel->update($logId, [
-                'status' => $success ? 'success' : 'failed',
-                'output' => $output,
-            ]);
-
-            echo json_encode([
-                'success' => $success,
-                'output' => $output,
-                'new_commit' => $newCommit,
-                'error' => !$success ? trim($fetch['stderr'] . "\n" . $pull['stderr']) : null,
-            ]);
-            exit;
-        } catch (Exception $e) {
-            echo json_encode([
-                'success' => false,
-                'error' => $e->getMessage(),
-                'output' => $output,
-            ]);
+        if (!$result) {
+            $logModel->update($logId, ['status' => 'failed', 'output' => 'Worker process returned no output.']);
+            echo json_encode(['success' => false, 'error' => 'Update worker failed to start.', 'output' => '']);
             exit;
         }
+
+        $data = json_decode($result, true);
+        if (!$data) {
+            $logModel->update($logId, ['status' => 'failed', 'output' => $result]);
+            echo json_encode(['success' => false, 'error' => 'Invalid response from worker.', 'output' => $result]);
+            exit;
+        }
+
+        $logModel->update($logId, [
+            'status' => $data['success'] ? 'success' : 'failed',
+            'output' => $data['output'] ?? '',
+            'branch' => $data['new_commit'] ?? '',
+        ]);
+
+        echo json_encode($data);
+        exit;
     }
 
     public function fullUpdate()
@@ -184,63 +170,45 @@ class SelfUpdateController
         $auth->requireAdmin();
 
         header('Content-Type: application/json');
-        $repoPath = BASE_PATH;
-        $output = '';
-        $success = true;
 
-        try {
-            $result = $this->runGit(['rev-parse', '--abbrev-ref', 'HEAD']);
-            if ($result['exitCode'] !== 0) {
-                throw new Exception('Failed to get current branch: ' . ($result['stderr'] ?: 'unknown error'));
-            }
-            $currentBranch = $result['stdout'];
+        $logModel = new DeployLog();
+        $logId = $logModel->create([
+            'action' => 'self_full_update',
+            'branch' => '',
+            'previous_commit' => '',
+            'status' => 'running',
+            'user_id' => $_SESSION['user_id'] ?? 0,
+        ]);
+        $logModel->update($logId, ['status' => 'running']);
 
-            $result = $this->runGit(['log', '-1', '--format=%h | %ci']);
-            $oldCommit = $result['exitCode'] === 0 ? $result['stdout'] : 'Unknown';
+        $phpBin = PHP_BINARY ?: 'php';
+        $worker = escapeshellarg(BASE_PATH . 'update_worker.php');
+        $action = 'full';
+        $uid = (int)($_SESSION['user_id'] ?? 0);
+        $cmd = "{$phpBin} {$worker} {$action} {$uid}";
+        $result = shell_exec($cmd);
 
-            $logModel = new DeployLog();
-            $logId = $logModel->create([
-                'action' => 'self_full_update',
-                'branch' => $currentBranch,
-                'previous_commit' => $oldCommit,
-                'status' => 'running',
-                'user_id' => $_SESSION['user_id'] ?? 0,
-            ]);
-
-            // Step 1: Fetch
-            $fetch = $this->runGit(['fetch', 'origin']);
-            $output .= "========== Step 1: git fetch ==========\n" . $fetch['stdout'] . "\n" . $fetch['stderr'] . "\n\n";
-            $success = $success && $fetch['exitCode'] === 0;
-
-            // Step 2: Pull
-            $pull = $this->runGit(['pull', 'origin', $currentBranch]);
-            $output .= "========== Step 2: git pull ==========\n" . $pull['stdout'] . "\n" . $pull['stderr'] . "\n\n";
-            $success = $success && $pull['exitCode'] === 0;
-
-            // Step 3: Run auto-migrations (they run on every page load via index.php)
-
-            $result = $this->runGit(['log', '-1', '--format=%h | %ci']);
-            $newCommit = $result['exitCode'] === 0 ? $result['stdout'] : 'Unknown';
-
-            $logModel->update($logId, [
-                'status' => $success ? 'success' : 'failed',
-                'output' => $output,
-            ]);
-
-            echo json_encode([
-                'success' => $success,
-                'output' => $output,
-                'new_commit' => $newCommit,
-                'error' => !$success ? 'One or more steps failed. Check output above.' : null,
-            ]);
-            exit;
-        } catch (Exception $e) {
-            echo json_encode([
-                'success' => false,
-                'error' => $e->getMessage(),
-                'output' => $output,
-            ]);
+        if (!$result) {
+            $logModel->update($logId, ['status' => 'failed', 'output' => 'Worker process returned no output.']);
+            echo json_encode(['success' => false, 'error' => 'Update worker failed to start.', 'output' => '']);
             exit;
         }
+
+        $data = json_decode($result, true);
+        if (!$data) {
+            $logModel->update($logId, ['status' => 'failed', 'output' => $result]);
+            echo json_encode(['success' => false, 'error' => 'Invalid response from worker.', 'output' => $result]);
+            exit;
+        }
+
+        $logModel->update($logId, [
+            'status' => $data['success'] ? 'success' : 'failed',
+            'output' => $data['output'] ?? '',
+            'branch' => $data['new_commit'] ?? '',
+        ]);
+
+        echo json_encode($data);
+        exit;
     }
+}
 }
