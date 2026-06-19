@@ -90,19 +90,19 @@ if ($action === 'full') {
     $output .= "========== Step 1: git fetch ==========\n" . $fetch['stdout'] . "\n" . $fetch['stderr'] . "\n\n";
     $fetchOk = $fetch['exitCode'] === 0;
 
-    // Step 2: Pull
-    $pull = runGit(['pull', 'origin', $currentBranch]);
-    $output .= "========== Step 2: git pull ==========\n" . $pull['stdout'] . "\n" . $pull['stderr'] . "\n\n";
-    $pullOk = $pull['exitCode'] === 0;
+    // Step 2: Reset hard to remote (discards any local changes on prod)
+    $reset = runGit(['reset', '--hard', "origin/{$currentBranch}"]);
+    $output .= "========== Step 2: git reset --hard origin/{$currentBranch} ==========\n" . $reset['stdout'] . "\n" . $reset['stderr'] . "\n\n";
+    $resetOk = $reset['exitCode'] === 0;
 
-    $success = $fetchOk && $pullOk;
+    $success = $fetchOk && $resetOk;
 } else {
     // Simple pull
     $fetch = runGit(['fetch', 'origin']);
     $output .= "> git fetch origin\n" . $fetch['stdout'] . "\n" . $fetch['stderr'] . "\n";
-    $pull = runGit(['pull', 'origin', $currentBranch]);
-    $output .= "> git pull origin {$currentBranch}\n" . $pull['stdout'] . "\n" . $pull['stderr'] . "\n";
-    $success = $fetch['exitCode'] === 0 && $pull['exitCode'] === 0;
+    $reset = runGit(['reset', '--hard', "origin/{$currentBranch}"]);
+    $output .= "> git reset --hard origin/{$currentBranch}\n" . $reset['stdout'] . "\n" . $reset['stderr'] . "\n";
+    $success = $fetch['exitCode'] === 0 && $reset['exitCode'] === 0;
 }
 
 $newCommit = getCommit();
