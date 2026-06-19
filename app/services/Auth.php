@@ -95,6 +95,20 @@ class Auth
         }
     }
 
+    public function requireAdmin()
+    {
+        $this->requireAuth();
+        if (($_SESSION['role'] ?? '') !== 'admin') {
+            header('Location: ' . BASE_URL . 'dashboard');
+            exit;
+        }
+    }
+
+    public function isUser()
+    {
+        return ($_SESSION['role'] ?? '') === 'user';
+    }
+
     public function getDepartmentId()
     {
         return $_SESSION['department_id'] ?? null;

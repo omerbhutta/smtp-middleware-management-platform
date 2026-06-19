@@ -45,7 +45,7 @@ class SuppressionController
     public function remove()
     {
         $auth = new Auth();
-        $auth->requireAuth();
+        $auth->requireAdmin();
 
         $email = $_GET['email'] ?? '';
         if ($email) {

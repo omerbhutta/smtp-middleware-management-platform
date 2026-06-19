@@ -4,7 +4,7 @@ class DepartmentsController
     public function index()
     {
         $auth = new Auth();
-        $auth->requireAuth();
+        $auth->requireAdmin();
 
         $deptModel = new Department();
         $departments = $deptModel->getAll();
@@ -23,7 +23,7 @@ class DepartmentsController
     public function create()
     {
         $auth = new Auth();
-        $auth->requireAuth();
+        $auth->requireAdmin();
 
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $deptModel = new Department();
@@ -58,7 +58,7 @@ class DepartmentsController
     public function edit()
     {
         $auth = new Auth();
-        $auth->requireAuth();
+        $auth->requireAdmin();
 
         $deptModel = new Department();
         $id = $_GET['id'] ?? 0;
@@ -96,7 +96,7 @@ class DepartmentsController
     public function delete()
     {
         $auth = new Auth();
-        $auth->requireAuth();
+        $auth->requireAdmin();
 
         $id = $_GET['id'] ?? 0;
         $deptModel = new Department();

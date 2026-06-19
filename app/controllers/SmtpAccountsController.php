@@ -4,7 +4,7 @@ class SmtpAccountsController
     public function index()
     {
         $auth = new Auth();
-        $auth->requireAuth();
+        $auth->requireAdmin();
 
         $smtpModel = new SmtpAccount();
         $accounts = $smtpModel->getAll();
@@ -23,7 +23,7 @@ class SmtpAccountsController
     public function create()
     {
         $auth = new Auth();
-        $auth->requireAuth();
+        $auth->requireAdmin();
 
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $smtpModel = new SmtpAccount();
@@ -76,7 +76,7 @@ class SmtpAccountsController
     public function edit()
     {
         $auth = new Auth();
-        $auth->requireAuth();
+        $auth->requireAdmin();
 
         $smtpModel = new SmtpAccount();
         $id = $_GET['id'] ?? 0;
@@ -133,7 +133,7 @@ class SmtpAccountsController
     public function test_smtp()
     {
         $auth = new Auth();
-        $auth->requireAuth();
+        $auth->requireAdmin();
 
         header('Content-Type: application/json');
 
@@ -168,7 +168,7 @@ class SmtpAccountsController
     public function delete()
     {
         $auth = new Auth();
-        $auth->requireAuth();
+        $auth->requireAdmin();
 
         $id = $_GET['id'] ?? 0;
         $smtpModel = new SmtpAccount();

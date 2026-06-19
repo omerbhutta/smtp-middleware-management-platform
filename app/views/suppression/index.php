@@ -16,7 +16,9 @@
                         <th>Reason</th>
                         <th>Source</th>
                         <th>Added</th>
+                        <?php if (($_SESSION['role'] ?? '') === 'admin'): ?>
                         <th style="text-align:right;">Actions</th>
+                        <?php endif; ?>
                     </tr>
                 </thead>
                 <tbody>
@@ -27,12 +29,14 @@
                         <td><span class="badge-smm badge-smm-neutral"><?= escape($s['source']) ?></span></td>
                         <td><span style="color:var(--text-muted);font-size:0.82rem;"><?= date('M j, Y', strtotime($s['created_at'])) ?></span></td>
                         <td style="text-align:right;">
+                            <?php if (($_SESSION['role'] ?? '') === 'admin'): ?>
                             <a href="suppression/remove&email=<?= urlencode($s['email']) ?>" class="btn-smm btn-smm-success btn-smm-xs" onclick="return confirm('Remove from suppression?')"><i class="fas fa-check"></i> Remove</a>
+                            <?php endif; ?>
                         </td>
                     </tr>
                     <?php endforeach; ?>
                     <?php if (empty($suppressions['data'])): ?>
-                    <tr><td colspan="5"><div class="empty-state"><i class="fas fa-shield"></i><h4>No Suppressed Emails</h4><p>All clear. No email addresses are currently blocked.</p></div></td></tr>
+                    <tr><td colspan="<?= (($_SESSION['role'] ?? '') === 'admin') ? 5 : 4 ?>"><div class="empty-state"><i class="fas fa-shield"></i><h4>No Suppressed Emails</h4><p>All clear. No email addresses are currently blocked.</p></div></td></tr>
                     <?php endif; ?>
                 </tbody>
             </table>

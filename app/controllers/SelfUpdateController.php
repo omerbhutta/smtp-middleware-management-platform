@@ -78,7 +78,7 @@ class SelfUpdateController
     public function index()
     {
         $auth = new Auth();
-        $auth->requireAuth();
+        $auth->requireAdmin();
 
         $repoPath = BASE_PATH;
         $currentBranch = 'Unknown';
@@ -120,7 +120,7 @@ class SelfUpdateController
     public function pull()
     {
         $auth = new Auth();
-        $auth->requireAuth();
+        $auth->requireAdmin();
 
         header('Content-Type: application/json');
         $repoPath = BASE_PATH;
@@ -181,7 +181,7 @@ class SelfUpdateController
     public function fullUpdate()
     {
         $auth = new Auth();
-        $auth->requireAuth();
+        $auth->requireAdmin();
 
         header('Content-Type: application/json');
         $repoPath = BASE_PATH;

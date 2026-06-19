@@ -4,7 +4,7 @@ class SettingsController
     public function suppression_api()
     {
         $auth = new Auth();
-        $auth->requireAuth();
+        $auth->requireAdmin();
 
         $syncService = new SuppressionSyncService();
         $settings = new SystemSetting();

@@ -86,6 +86,14 @@ try {
         // column already exists
     }
 
+    // Auto-migration: update role ENUM from admin/manager to admin/user
+    try {
+        $pdo->exec("UPDATE `users` SET `role` = 'admin' WHERE `role` NOT IN ('admin','user')");
+        $pdo->exec("ALTER TABLE `users` MODIFY COLUMN `role` ENUM('admin','user') NOT NULL DEFAULT 'admin'");
+    } catch (PDOException $e) {
+        // migration already applied or column type can't be changed
+    }
+
     // Auto-migration: create deploy_logs table
     try {
         $pdo->exec("CREATE TABLE IF NOT EXISTS `deploy_logs` (

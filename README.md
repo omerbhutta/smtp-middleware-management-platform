@@ -37,6 +37,21 @@ A web-based SMTP middleware management system with department-based security key
 4. **SMTP Accounts** → Add your SMTP provider credentials
 5. **API Endpoint** → Use `https://yourdomain.com/api/send` to send emails
 
+## User Roles
+
+The platform has two built-in roles:
+
+### Admin
+Full access to all features — manage users, SMTP accounts, departments, security keys, suppression lists, analytics, audit logs, system settings, and self-updates.
+
+### User
+Read-only access for monitoring and tracking:
+- Dashboard, Email Activity, Analytics, Audit Logs, Documentation
+- Suppression Logs — can **add** new entries but cannot remove existing ones
+- All management screens (Users, SMTP Accounts, Departments, Security Keys, Suppression API, Self Update) are hidden
+
+Role is assigned when creating/editing a user via **Users → Create/Edit User → Role** dropdown.
+
 ## Microsoft OAuth2 Login
 
 Users can sign in with their Microsoft work/school accounts instead of using a username/password.

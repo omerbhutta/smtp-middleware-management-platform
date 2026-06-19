@@ -4,7 +4,7 @@ class UsersController
     public function index()
     {
         $auth = new Auth();
-        $auth->requireAuth();
+        $auth->requireAdmin();
 
         $userModel = new User();
         $users = $userModel->getAll();
@@ -23,7 +23,7 @@ class UsersController
     public function create()
     {
         $auth = new Auth();
-        $auth->requireAuth();
+        $auth->requireAdmin();
 
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $plainPassword = $_POST['password'];
@@ -88,7 +88,7 @@ class UsersController
     public function edit()
     {
         $auth = new Auth();
-        $auth->requireAuth();
+        $auth->requireAdmin();
 
         $userModel = new User();
         $id = $_GET['id'] ?? 0;
@@ -133,7 +133,8 @@ class UsersController
             }
             $userModel->update($id, $data);
             if ($passwordChanged) {
-                $userUrl = portalUrl();
+                $protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
+                $portalUrl = $protocol . '://' . $_SERVER['HTTP_HOST'] . BASE_URL;
                 SmtpMailer::sendPortalEmail(
                     $user['email'],
                     'Your ' . ($app_name ?? 'SMMP') . ' Password Has Been Changed',
@@ -144,31 +145,6 @@ class UsersController
                     . '</div>'
                     . '<div style="padding:32px;">'
                     . '<p style="color:#374151;font-size:15px;line-height:1.6;">Your password has been changed. Here are your updated credentials:</p>'
-                    . '<div style="background:#f9fafb;border:1px solid #e5e7eb;border-radius:8px;padding:20px;margin:16px 0;">'
-                    . '<p style="margin:4px 0;font-size:14px;color:#6b7280;"><strong style="color:#374151;">Full Name:</strong> ' . escape($user['full_name'] ?? $user['username']) . '</p>'
-                    . '<p style="margin:4px 0;font-size:14px;color:#6b7280;"><strong style="color:#374151;">Username:</strong> ' . escape($user['username']) . '</p>'
-                    . '<p style="margin:4px 0;font-size:14px;color:#6b7280;"><strong style="color:#374151;">New Password:</strong> <span style="font-family:monospace;background:#e5e7eb;padding:2px 8px;border-radius:4px;">' . escape($_POST['password']) . '</span></p>'
-                    . '</div>'
-                    . '<a href="' . $userUrl . 'auth/login" style="display:inline-block;padding:12px 32px;background:#3b82f6;color:#fff;text-decoration:none;border-radius:8px;font-size:15px;font-weight:600;">Sign In to Dashboard</a>'
-                    . '<p style="color:#9ca3af;font-size:12px;margin-top:24px;border-top:1px solid #e5e7eb;padding-top:16px;">This is an automated message from ' . escape($app_name ?? 'SMMP') . '.</p>'
-                    . '</div>'
-                    . '</div>'
-                );
-            }
-            $userModel->update($id, $data);
-            if ($passwordChanged) {
-                $protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
-                $portalUrl = $protocol . '://' . $_SERVER['HTTP_HOST'] . BASE_URL;
-                SmtpMailer::sendPortalEmail(
-                    $user['email'],
-                    'Your ' . ($app_name ?? 'SMMP') . ' Password Has Been Changed',
-                    '<div style="font-family:Arial,Helvetica,sans-serif;max-width:560px;margin:0 auto;background:#fff;border:1px solid #e5e7eb;border-radius:12px;overflow:hidden;">'
-                    . '<div style="background:linear-gradient(135deg,#f59e0b,#d97706);padding:32px;text-align:center;">'
-                    . '<h1 style="color:#fff;margin:0;font-size:22px;">' . escape($app_name ?? 'SMMP') . '</h1>'
-                    . '<p style="color:rgba(255,255,255,.85);margin:8px 0 0;font-size:14px;">Password Updated Successfully</p>'
-                    . '</div>'
-                    . '<div style="padding:32px;">'
-                    . '<p style="color:#374151;font-size:15px;line-height:1.6;">Your account password has been changed. Here are your updated credentials:</p>'
                     . '<div style="background:#f9fafb;border:1px solid #e5e7eb;border-radius:8px;padding:20px;margin:16px 0;">'
                     . '<p style="margin:4px 0;font-size:14px;color:#6b7280;"><strong style="color:#374151;">Username:</strong> ' . escape($user['username']) . '</p>'
                     . '<p style="margin:4px 0;font-size:14px;color:#6b7280;"><strong style="color:#374151;">New Password:</strong> <span style="font-family:monospace;background:#e5e7eb;padding:2px 8px;border-radius:4px;">' . escape($_POST['password']) . '</span></p>'
@@ -199,7 +175,7 @@ class UsersController
     public function delete()
     {
         $auth = new Auth();
-        $auth->requireAuth();
+        $auth->requireAdmin();
 
         $id = $_GET['id'] ?? 0;
         if ($id == ($_SESSION['user_id'] ?? 0)) {

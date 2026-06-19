@@ -16,7 +16,7 @@
     <div class="sidebar-overlay"></div>
 
     <!-- Sidebar -->
-    <aside id="sidebar" class="sidebar <?= ($_SESSION['sidebar_state'] ?? 'collapsed') === 'expanded' ? 'expanded' : 'collapsed' ?>">
+    <aside id="sidebar" class="sidebar collapsed">
         <div class="sidebar-brand">
             <div class="sidebar-brand-icon">
                 <svg class="anim-envelope" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -38,7 +38,11 @@
                 <a href="email_logs" class="nav-link-smm <?= $active_menu === 'email_logs' ? 'active' : '' ?>">
                     <i class="fas fa-envelope-open-text"></i> <span class="sidebar-text">Email Activity</span>
                 </a>
+                <a href="suppression" class="nav-link-smm <?= $active_menu === 'suppression' ? 'active' : '' ?>">
+                    <i class="fas fa-ban"></i> <span class="sidebar-text">Suppression Logs</span>
+                </a>
 
+                <?php if (($_SESSION['role'] ?? '') === 'admin'): ?>
                 <div class="sidebar-section sidebar-text">Management</div>
                 <a href="users" class="nav-link-smm <?= $active_menu === 'users' ? 'active' : '' ?>">
                     <i class="fas fa-users"></i> <span class="sidebar-text">Users</span>
@@ -52,12 +56,10 @@
                 <a href="security_keys" class="nav-link-smm <?= $active_menu === 'security_keys' ? 'active' : '' ?>">
                     <i class="fas fa-key"></i> <span class="sidebar-text">Security Keys</span>
                 </a>
-                <a href="suppression" class="nav-link-smm <?= $active_menu === 'suppression' ? 'active' : '' ?>">
-                    <i class="fas fa-ban"></i> <span class="sidebar-text">Suppression Logs</span>
-                </a>
                 <a href="settings/suppression_api" class="nav-link-smm <?= $active_menu === 'settings' ? 'active' : '' ?>">
                     <i class="fas fa-cloud-download-alt"></i> <span class="sidebar-text">Suppression API</span>
                 </a>
+                <?php endif; ?>
 
                 <div class="sidebar-section sidebar-text">Insights</div>
                 <a href="analytics" class="nav-link-smm <?= $active_menu === 'analytics' ? 'active' : '' ?>">
@@ -70,17 +72,21 @@
                     <i class="fas fa-question-circle"></i> <span class="sidebar-text">Documentation</span>
                 </a>
 
+                <?php if (($_SESSION['role'] ?? '') === 'admin'): ?>
                 <div class="sidebar-section sidebar-text mt-3">System</div>
                 <a href="self_update" class="nav-link-smm <?= $active_menu === 'self_update' ? 'active' : '' ?>">
                     <i class="fas fa-arrow-up-circle"></i> <span class="sidebar-text">Self Update</span>
                 </a>
+                <?php endif; ?>
             </nav>
         </div>
 
         <div class="sidebar-footer">
+            <?php if (($_SESSION['role'] ?? '') === 'admin'): ?>
             <a href="users/edit?id=<?= $_SESSION['user_id'] ?? 0 ?>" class="nav-link-smm">
                 <i class="fas fa-cog"></i> <span class="sidebar-text">Settings</span>
             </a>
+            <?php endif; ?>
             <a href="auth/logout" class="nav-link-smm">
                 <i class="fas fa-sign-out-alt"></i> <span class="sidebar-text">Sign Out</span>
             </a>
@@ -91,7 +97,7 @@
     </aside>
 
     <!-- Main Content -->
-    <div class="main-content <?= ($_SESSION['sidebar_state'] ?? 'collapsed') === 'expanded' ? 'expanded' : '' ?>" id="mainContent">
+    <div class="main-content" id="mainContent">
         <div class="top-bar">
             <div class="d-flex align-items-center gap-2">
                 <button id="mobileSidebarToggle" class="sidebar-toggle d-md-none">

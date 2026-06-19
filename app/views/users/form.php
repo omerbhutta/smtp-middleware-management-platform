@@ -29,6 +29,13 @@
                     </select>
                 </div>
                 <div class="col-md-3">
+                    <label class="form-label-smm">Role</label>
+                    <select name="role" class="form-control-smm">
+                        <option value="admin" <?= ($user['role'] ?? 'admin') === 'admin' ? 'selected' : '' ?>>Admin</option>
+                        <option value="user" <?= ($user['role'] ?? '') === 'user' ? 'selected' : '' ?>>User</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
                     <label class="form-label-smm">MFA</label>
                     <select name="mfa_enabled" class="form-control-smm">
                         <option value="1" <?= ($user['mfa_enabled'] ?? 1) ? 'selected' : '' ?>>Enabled</option>

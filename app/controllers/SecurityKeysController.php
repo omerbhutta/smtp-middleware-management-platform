@@ -4,7 +4,7 @@ class SecurityKeysController
     public function index()
     {
         $auth = new Auth();
-        $auth->requireAuth();
+        $auth->requireAdmin();
 
         $keyModel = new SecurityKey();
         $keys = $keyModel->getAll();
@@ -23,7 +23,7 @@ class SecurityKeysController
     public function create()
     {
         $auth = new Auth();
-        $auth->requireAuth();
+        $auth->requireAdmin();
 
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $keyModel = new SecurityKey();
@@ -66,7 +66,7 @@ class SecurityKeysController
     public function edit()
     {
         $auth = new Auth();
-        $auth->requireAuth();
+        $auth->requireAdmin();
 
         $keyModel = new SecurityKey();
         $id = $_GET['id'] ?? 0;
@@ -106,7 +106,7 @@ class SecurityKeysController
     public function delete()
     {
         $auth = new Auth();
-        $auth->requireAuth();
+        $auth->requireAdmin();
 
         $id = $_GET['id'] ?? 0;
         $keyModel = new SecurityKey();

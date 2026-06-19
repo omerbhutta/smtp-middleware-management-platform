@@ -11,6 +11,7 @@ $(function() {
             $sidebar.removeClass('expanded').addClass('collapsed');
             $main.removeClass('expanded');
         }
+    }
         // Save preference
         $.get('users/sidebar&state=' + (expanded ? 'expanded' : 'collapsed'));
     }
