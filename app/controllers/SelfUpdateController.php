@@ -124,40 +124,23 @@ class SelfUpdateController
 
         header('Content-Type: application/json');
 
+        try {
+            $data = $this->runWorker('pull');
+        } catch (Exception $e) {
+            $data = null;
+        }
+
+        if (!$data || !isset($data['success'])) {
+            $data = $this->runDirect('self_update');
+        }
+
         $logModel = new DeployLog();
-        $logId = $logModel->create([
+        $logModel->create([
             'action' => 'self_update',
-            'branch' => '',
-            'previous_commit' => '',
-            'status' => 'running',
-            'user_id' => $_SESSION['user_id'] ?? 0,
-        ]);
-        $logModel->update($logId, ['status' => 'running']);
-
-        $phpBin = PHP_BINARY ?: 'php';
-        $worker = escapeshellarg(BASE_PATH . 'update_worker.php');
-        $action = 'pull';
-        $uid = (int)($_SESSION['user_id'] ?? 0);
-        $cmd = "{$phpBin} {$worker} {$action} {$uid}";
-        $result = shell_exec($cmd);
-
-        if (!$result) {
-            $logModel->update($logId, ['status' => 'failed', 'output' => 'Worker process returned no output.']);
-            echo json_encode(['success' => false, 'error' => 'Update worker failed to start.', 'output' => '']);
-            exit;
-        }
-
-        $data = json_decode($result, true);
-        if (!$data) {
-            $logModel->update($logId, ['status' => 'failed', 'output' => $result]);
-            echo json_encode(['success' => false, 'error' => 'Invalid response from worker.', 'output' => $result]);
-            exit;
-        }
-
-        $logModel->update($logId, [
-            'status' => $data['success'] ? 'success' : 'failed',
-            'output' => $data['output'] ?? '',
             'branch' => $data['new_commit'] ?? '',
+            'previous_commit' => '',
+            'status' => $data['success'] ? 'success' : 'failed',
+            'user_id' => $_SESSION['user_id'] ?? 0,
         ]);
 
         echo json_encode($data);
@@ -171,44 +154,94 @@ class SelfUpdateController
 
         header('Content-Type: application/json');
 
+        try {
+            $data = $this->runWorker('full');
+        } catch (Exception $e) {
+            $data = null;
+        }
+
+        if (!$data || !isset($data['success'])) {
+            $data = $this->runDirect('self_full_update');
+        }
+
         $logModel = new DeployLog();
-        $logId = $logModel->create([
+        $logModel->create([
             'action' => 'self_full_update',
-            'branch' => '',
-            'previous_commit' => '',
-            'status' => 'running',
-            'user_id' => $_SESSION['user_id'] ?? 0,
-        ]);
-        $logModel->update($logId, ['status' => 'running']);
-
-        $phpBin = PHP_BINARY ?: 'php';
-        $worker = escapeshellarg(BASE_PATH . 'update_worker.php');
-        $action = 'full';
-        $uid = (int)($_SESSION['user_id'] ?? 0);
-        $cmd = "{$phpBin} {$worker} {$action} {$uid}";
-        $result = shell_exec($cmd);
-
-        if (!$result) {
-            $logModel->update($logId, ['status' => 'failed', 'output' => 'Worker process returned no output.']);
-            echo json_encode(['success' => false, 'error' => 'Update worker failed to start.', 'output' => '']);
-            exit;
-        }
-
-        $data = json_decode($result, true);
-        if (!$data) {
-            $logModel->update($logId, ['status' => 'failed', 'output' => $result]);
-            echo json_encode(['success' => false, 'error' => 'Invalid response from worker.', 'output' => $result]);
-            exit;
-        }
-
-        $logModel->update($logId, [
-            'status' => $data['success'] ? 'success' : 'failed',
-            'output' => $data['output'] ?? '',
             'branch' => $data['new_commit'] ?? '',
+            'previous_commit' => '',
+            'status' => $data['success'] ? 'success' : 'failed',
+            'user_id' => $_SESSION['user_id'] ?? 0,
         ]);
 
         echo json_encode($data);
         exit;
+    }
+
+    private function runWorker(string $action): ?array
+    {
+        $phpBin = PHP_BINARY;
+        if (!$phpBin || !is_executable($phpBin)) {
+            $phpBin = 'php';
+        }
+        $worker = BASE_PATH . 'update_worker.php';
+        if (!file_exists($worker)) {
+            return null;
+        }
+        $uid = (int)($_SESSION['user_id'] ?? 0);
+
+        $descriptorspec = [
+            0 => ['pipe', 'r'],
+            1 => ['pipe', 'w'],
+            2 => ['pipe', 'w'],
+        ];
+        $cmd = [$phpBin, $worker, $action, (string)$uid];
+        $process = @proc_open($cmd, $descriptorspec, $pipes, BASE_PATH);
+
+        if (!is_resource($process)) {
+            return null;
+        }
+        fclose($pipes[0]);
+        $stdout = stream_get_contents($pipes[1]);
+        $stderr = stream_get_contents($pipes[2]);
+        fclose($pipes[1]); fclose($pipes[2]);
+        proc_close($process);
+
+        if (!$stdout) {
+            return null;
+        }
+        $data = json_decode($stdout, true);
+        return is_array($data) ? $data : null;
+    }
+
+    private function runDirect(string $action): array
+    {
+        $currentBranch = 'main';
+        $r = $this->runGit(['rev-parse', '--abbrev-ref', 'HEAD']);
+        if ($r['exitCode'] === 0) {
+            $currentBranch = $r['stdout'] ?: 'main';
+        }
+
+        $output = '';
+
+        $fetch = $this->runGit(['fetch', 'origin']);
+        $output .= "> git fetch origin\n" . $fetch['stdout'] . "\n" . $fetch['stderr'] . "\n";
+        $fetchOk = $fetch['exitCode'] === 0;
+
+        $reset = $this->runGit(['reset', '--hard', "origin/{$currentBranch}"]);
+        $output .= "> git reset --hard origin/{$currentBranch}\n" . $reset['stdout'] . "\n" . $reset['stderr'] . "\n";
+        $resetOk = $reset['exitCode'] === 0;
+
+        $r = $this->runGit(['log', '-1', '--format=%h | %ci']);
+        $newCommit = $r['exitCode'] === 0 ? $r['stdout'] : 'Unknown';
+
+        $success = $fetchOk && $resetOk;
+
+        return [
+            'success' => $success,
+            'output' => $output,
+            'new_commit' => $newCommit,
+            'error' => $success ? null : 'One or more steps failed. Check output above.',
+        ];
     }
 }
 }
