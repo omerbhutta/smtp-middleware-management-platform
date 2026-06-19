@@ -101,12 +101,20 @@ class UsersController
         }
 
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            // Handle MS settings save
+            // Handle MS settings save — only update non-empty fields
             if (!empty($_POST['update_ms_settings'])) {
-                saveEnvSetting('MS_CLIENT_ID', $_POST['ms_client_id'] ?? '');
-                saveEnvSetting('MS_CLIENT_SECRET', $_POST['ms_client_secret'] ?? '');
-                saveEnvSetting('MS_TENANT_ID', $_POST['ms_tenant_id'] ?? 'common');
-                saveEnvSetting('MS_REDIRECT_URI', $_POST['ms_redirect_uri'] ?? '');
+                if (!empty($_POST['ms_client_id'])) {
+                    saveEnvSetting('MS_CLIENT_ID', $_POST['ms_client_id']);
+                }
+                if (!empty($_POST['ms_client_secret'])) {
+                    saveEnvSetting('MS_CLIENT_SECRET', $_POST['ms_client_secret']);
+                }
+                if (!empty($_POST['ms_tenant_id'])) {
+                    saveEnvSetting('MS_TENANT_ID', $_POST['ms_tenant_id']);
+                }
+                if (!empty($_POST['ms_redirect_uri'])) {
+                    saveEnvSetting('MS_REDIRECT_URI', $_POST['ms_redirect_uri']);
+                }
                 flash('success', 'Microsoft login settings saved.');
                 header('Location: ' . BASE_URL . 'users/edit?id=' . $id);
                 exit;

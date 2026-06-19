@@ -57,28 +57,63 @@
         </div>
         <?php endif; ?>
 
+        <?php
+        $msClientId = $_ENV['MS_CLIENT_ID'] ?? '';
+        $msClientSecret = $_ENV['MS_CLIENT_SECRET'] ?? '';
+        $msTenantId = $_ENV['MS_TENANT_ID'] ?? 'common';
+        $msRedirectUri = $_ENV['MS_REDIRECT_URI'] ?? (portalUrl() . 'auth/microsoft/callback');
+
+        $maskedClientId = '';
+        $maskedClientSecret = '';
+
+        if (!empty($msClientId)) {
+            $len = strlen($msClientId);
+            $show = min(4, intdiv($len, 3));
+            $maskedClientId = $len > $show * 2
+                ? substr($msClientId, 0, $show) . str_repeat('•', min(12, $len - $show * 2)) . substr($msClientId, -$show)
+                : $msClientId;
+        }
+        if (!empty($msClientSecret)) {
+            $len = strlen($msClientSecret);
+            $show = min(4, intdiv($len, 3));
+            $maskedClientSecret = $len > $show * 2
+                ? substr($msClientSecret, 0, $show) . str_repeat('•', min(12, $len - $show * 2)) . substr($msClientSecret, -$show)
+                : $msClientSecret;
+        }
+        ?>
+
+        <div style="background:var(--bg-primary);border:1px solid var(--border-color);border-radius:8px;padding:16px;margin-bottom:20px;">
+            <h6 style="margin:0 0 12px;font-size:0.85rem;color:var(--text-secondary);"><i class="fas fa-info-circle me-1"></i> Current Configuration</h6>
+            <table style="width:100%;font-size:0.82rem;color:var(--text-secondary);">
+                <tr><td style="padding:4px 12px 4px 0;white-space:nowrap;color:var(--text-muted);">Client ID:</td><td style="font-family:monospace;"><?= escape($maskedClientId ?: 'Not configured') ?></td></tr>
+                <tr><td style="padding:4px 12px 4px 0;white-space:nowrap;color:var(--text-muted);">Client Secret:</td><td style="font-family:monospace;"><?= escape($maskedClientSecret ?: 'Not configured') ?></td></tr>
+                <tr><td style="padding:4px 12px 4px 0;white-space:nowrap;color:var(--text-muted);">Tenant ID:</td><td style="font-family:monospace;"><?= escape($msTenantId ?: 'common') ?></td></tr>
+                <tr><td style="padding:4px 12px 4px 0;white-space:nowrap;color:var(--text-muted);">Redirect URI:</td><td style="font-family:monospace;word-break:break-all;"><?= escape($msRedirectUri ?: 'Not configured') ?></td></tr>
+            </table>
+        </div>
+
         <form method="POST" action="users/edit?id=<?= $user['id'] ?>">
             <input type="hidden" name="update_ms_settings" value="1">
             <p style="color:var(--text-muted);font-size:0.85rem;margin-bottom:16px;">
-                Configure Microsoft OAuth 2.0 app credentials. Users will be able to sign in using their Microsoft work/school accounts.
+                Configure Microsoft OAuth 2.0 app credentials. Leave fields blank to keep existing values. Fill in any field to update it.
             </p>
             <div class="row g-3">
                 <div class="col-md-6">
                     <label class="form-label-smm">Client ID <span style="color:var(--text-muted);font-weight:400;">(Application ID)</span></label>
-                    <input type="text" name="ms_client_id" class="form-control-smm" value="<?= escape($_ENV['MS_CLIENT_ID'] ?? '') ?>" placeholder="e.g. 12345678-1234-1234-1234-123456789abc">
+                    <input type="text" name="ms_client_id" class="form-control-smm" value="" placeholder="Leave blank to keep current, or enter new Client ID">
                 </div>
                 <div class="col-md-6">
                     <label class="form-label-smm">Client Secret</label>
-                    <input type="password" name="ms_client_secret" class="form-control-smm" value="<?= escape($_ENV['MS_CLIENT_SECRET'] ?? '') ?>" placeholder="Enter a strong client secret">
+                    <input type="password" name="ms_client_secret" class="form-control-smm" value="" placeholder="Leave blank to keep current, or enter new Secret">
                 </div>
                 <div class="col-md-6">
                     <label class="form-label-smm">Tenant ID</label>
-                    <input type="text" name="ms_tenant_id" class="form-control-smm" value="<?= escape($_ENV['MS_TENANT_ID'] ?? 'common') ?>" placeholder="common or your tenant/directory ID">
+                    <input type="text" name="ms_tenant_id" class="form-control-smm" value="<?= escape($msTenantId) ?>" placeholder="common or your tenant/directory ID">
                     <small style="color:var(--text-muted);font-size:0.7rem;">Use <code>common</code> for multi-tenant or your specific tenant ID.</small>
                 </div>
                 <div class="col-md-6">
                     <label class="form-label-smm">Redirect URI</label>
-                    <input type="text" name="ms_redirect_uri" class="form-control-smm" value="<?= escape($_ENV['MS_REDIRECT_URI'] ?? (portalUrl() . 'auth/microsoft/callback')) ?>">
+                    <input type="text" name="ms_redirect_uri" class="form-control-smm" value="<?= escape($msRedirectUri) ?>" placeholder="Must match your Azure app registration">
                     <small style="color:var(--text-muted);font-size:0.7rem;">Must match the redirect URI configured in your Azure app registration.</small>
                 </div>
             </div>
