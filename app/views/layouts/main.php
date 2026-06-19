@@ -75,7 +75,7 @@
                 <?php if (($_SESSION['role'] ?? '') === 'admin'): ?>
                 <div class="sidebar-section sidebar-text mt-3">System</div>
                 <a href="self_update" class="nav-link-smm <?= $active_menu === 'self_update' ? 'active' : '' ?>">
-                    <i class="fas fa-arrow-up-circle"></i> <span class="sidebar-text">Self Update</span>
+                    <i class="fas fa-sync-alt"></i> <span class="sidebar-text">Self Update</span>
                 </a>
                 <?php endif; ?>
             </nav>
