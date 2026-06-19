@@ -28,7 +28,7 @@ class AuthController
                 if ($user) {
                     if ($user['mfa_enabled']) {
                         $code = $this->auth->generateMfaCode($user['id']);
-                        $emailSent = SmtpMailer::sendPortalEmail($user['email'], 'Your MFA Code', "<h2>Your OTP Code</h2><p style='font-size:24px;font-weight:bold;letter-spacing:5px;'>{$code}</p><p>This code expires in 5 minutes.</p>");
+                        $emailSent = SmtpMailer::sendPortalEmail($user['email'], 'SMMP | OTP Request', "<h2>Your OTP Code</h2><p style='font-size:24px;font-weight:bold;letter-spacing:5px;'>{$code}</p><p>This code expires in 5 minutes.</p><hr style='border:none;border-top:1px solid #e5e7eb;margin:16px 0;'><p style='color:#9ca3af;font-size:12px;'>This is an automated message from SMTP Management Platform (SMMP).</p>");
                         if (!$emailSent['status']) {
                             $this->auth->completeLogin($user['id']);
                             AuditService::log($user['id'], 'Login', 'User logged in (MFA skipped - no portal SMTP)');

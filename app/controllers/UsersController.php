@@ -45,7 +45,7 @@ class UsersController
             $userUrl = portalUrl();
             SmtpMailer::sendPortalEmail(
                 $_POST['email'],
-                'Your ' . ($app_name ?? 'SMMP') . ' Account Credentials',
+                'SMMP | Your Account Credentials',
                 '<div style="font-family:Arial,Helvetica,sans-serif;max-width:560px;margin:0 auto;background:#fff;border:1px solid #e5e7eb;border-radius:12px;overflow:hidden;">'
                 . '<div style="background:linear-gradient(135deg,#3b82f6,#06b6d4);padding:32px;text-align:center;">'
                 . '<h1 style="color:#fff;margin:0;font-size:22px;">' . escape($app_name ?? 'SMMP') . '</h1>'
@@ -59,7 +59,8 @@ class UsersController
                 . '<p style="margin:4px 0;font-size:14px;color:#6b7280;"><strong style="color:#374151;">Password:</strong> <span style="font-family:monospace;background:#e5e7eb;padding:2px 8px;border-radius:4px;">' . escape($plainPassword) . '</span></p>'
                 . '</div>'
                 . '<a href="' . $userUrl . 'auth/login" style="display:inline-block;padding:12px 32px;background:#3b82f6;color:#fff;text-decoration:none;border-radius:8px;font-size:15px;font-weight:600;">Sign In to Dashboard</a>'
-                . '<p style="color:#9ca3af;font-size:12px;margin-top:24px;border-top:1px solid #e5e7eb;padding-top:16px;">This is an automated message from ' . escape($app_name ?? 'SMMP') . '.</p>'
+                . '<hr style="border:none;border-top:1px solid #e5e7eb;margin:16px 0;">'
+                . '<p style="color:#9ca3af;font-size:12px;">This is an automated message from SMTP Management Platform (SMMP).</p>'
                 . '</div>'
                 . '</div>'
             );
@@ -140,7 +141,7 @@ class UsersController
                 $portalUrl = $protocol . '://' . $_SERVER['HTTP_HOST'] . BASE_URL;
                 SmtpMailer::sendPortalEmail(
                     $user['email'],
-                    'Your ' . ($app_name ?? 'SMMP') . ' Password Has Been Changed',
+                    'SMMP | Password Changed',
                     '<div style="font-family:Arial,Helvetica,sans-serif;max-width:560px;margin:0 auto;background:#fff;border:1px solid #e5e7eb;border-radius:12px;overflow:hidden;">'
                     . '<div style="background:linear-gradient(135deg,#f59e0b,#d97706);padding:32px;text-align:center;">'
                     . '<h1 style="color:#fff;margin:0;font-size:22px;">' . escape($app_name ?? 'SMMP') . '</h1>'
@@ -153,7 +154,8 @@ class UsersController
                     . '<p style="margin:4px 0;font-size:14px;color:#6b7280;"><strong style="color:#374151;">New Password:</strong> <span style="font-family:monospace;background:#e5e7eb;padding:2px 8px;border-radius:4px;">' . escape($_POST['password']) . '</span></p>'
                     . '</div>'
                     . '<a href="' . $portalUrl . 'auth/login" style="display:inline-block;padding:12px 32px;background:#3b82f6;color:#fff;text-decoration:none;border-radius:8px;font-size:15px;font-weight:600;">Sign In to Dashboard</a>'
-                    . '<p style="color:#9ca3af;font-size:12px;margin-top:24px;border-top:1px solid #e5e7eb;padding-top:16px;">This is an automated message from ' . escape($app_name ?? 'SMMP') . '. Please do not reply.</p>'
+                    . '<hr style="border:none;border-top:1px solid #e5e7eb;margin:16px 0;">'
+                    . '<p style="color:#9ca3af;font-size:12px;">This is an automated message from SMTP Management Platform (SMMP). Please do not reply.</p>'
                     . '</div>'
                     . '</div>'
                 );

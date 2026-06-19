@@ -82,7 +82,7 @@ function notifyAllUsers($subject, $body)
         foreach ($users as $user) {
             SmtpMailer::sendPortalEmail(
                 $user['email'],
-                $subject,
+                'SMMP | ' . $subject,
                 $body
             );
         }
@@ -164,7 +164,8 @@ function activityEmailTemplate($title, $message)
         . '<div style="padding:32px;">'
         . '<p style="color:#374151;font-size:15px;line-height:1.6;">' . nl2br(escape($message)) . '</p>'
         . '<a href="' . portalUrl() . 'dashboard" style="display:inline-block;padding:12px 32px;background:#3b82f6;color:#fff;text-decoration:none;border-radius:8px;font-size:15px;font-weight:600;">Go to Dashboard</a>'
-        . '<p style="color:#9ca3af;font-size:12px;margin-top:24px;border-top:1px solid #e5e7eb;padding-top:16px;">This is an automated notification from ' . escape($app_name ?? 'SMMP') . '.</p>'
+        . '<hr style="border:none;border-top:1px solid #e5e7eb;margin:16px 0;">'
+        . '<p style="color:#9ca3af;font-size:12px;">This is an automated notification from SMTP Management Platform (SMMP).</p>'
         . '</div>'
         . '</div>';
 }

@@ -156,7 +156,7 @@ class SmtpAccountsController
         }
 
         try {
-            $result = SmtpMailer::send($acc, $recipient, 'Test Email from SMMP', "<h3>SMTP Test</h3><p>This is a test email sent from <b>SMTP Middleware Management Platform</b>.</p><p>If you received this, your SMTP connection is working correctly.</p>");
+            $result = SmtpMailer::send($acc, $recipient, 'SMMP | SMTP Test', "<h3>SMTP Test</h3><p>This is a test email sent from <b>SMTP Middleware Management Platform</b>.</p><p>If you received this, your SMTP connection is working correctly.</p><hr style='border:none;border-top:1px solid #e5e7eb;margin:16px 0;'><p style='color:#9ca3af;font-size:12px;'>This is an automated message from SMTP Management Platform (SMMP).</p>");
             if ($result['status']) {
                 echo json_encode(['status' => true, 'message' => 'Test email sent successfully to ' . $recipient]);
             } else {
