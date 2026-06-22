@@ -79,11 +79,12 @@ function notifyAllUsers($subject, $body)
     try {
         $db = Database::getInstance();
         $users = $db->fetchAll("SELECT email, full_name, username FROM users WHERE status = 'active'");
+        $htmlBody = activityEmailTemplate($subject, $body);
         foreach ($users as $user) {
             SmtpMailer::sendPortalEmail(
                 $user['email'],
                 'SMMP | ' . $subject,
-                $body
+                $htmlBody
             );
         }
     } catch (Exception $e) {
@@ -156,18 +157,34 @@ function renderRecipientsHtml($recipientsStr, $errorMessage)
 function activityEmailTemplate($title, $message)
 {
     global $app_name;
-    return '<div style="font-family:Arial,Helvetica,sans-serif;max-width:560px;margin:0 auto;background:#fff;border:1px solid #e5e7eb;border-radius:12px;overflow:hidden;">'
-        . '<div style="background:linear-gradient(135deg,#3b82f6,#06b6d4);padding:32px;text-align:center;">'
-        . '<h1 style="color:#fff;margin:0;font-size:22px;">' . escape($app_name ?? 'SMMP') . '</h1>'
-        . '<p style="color:rgba(255,255,255,.85);margin:8px 0 0;font-size:14px;">' . escape($title) . '</p>'
-        . '</div>'
-        . '<div style="padding:32px;">'
-        . '<p style="color:#374151;font-size:15px;line-height:1.6;">' . nl2br(escape($message)) . '</p>'
-        . '<a href="' . portalUrl() . 'dashboard" style="display:inline-block;padding:12px 32px;background:#3b82f6;color:#fff;text-decoration:none;border-radius:8px;font-size:15px;font-weight:600;">Go to Dashboard</a>'
-        . '<hr style="border:none;border-top:1px solid #e5e7eb;margin:16px 0;">'
-        . '<p style="color:#9ca3af;font-size:12px;">This is an automated notification from SMTP Management Platform (SMMP).</p>'
-        . '</div>'
-        . '</div>';
+    $appName = escape($app_name ?? 'SMMP');
+    $safeTitle = escape($title);
+    $safeMessage = nl2br(escape($message));
+    $url = portalUrl() . 'dashboard';
+
+    return '<!DOCTYPE html>'
+        . '<html lang="en">'
+        . '<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"></head>'
+        . '<body style="margin:0;padding:0;background:#f1f5f9;font-family:-apple-system,BlinkMacSystemFont,\'Segoe UI\',Roboto,Helvetica,Arial,sans-serif;">'
+        . '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f1f5f9;">'
+        . '<tr><td align="center" style="padding:40px 16px;">'
+        . '<table role="presentation" width="560" cellpadding="0" cellspacing="0" style="max-width:560px;width:100%;">'
+        . '<tr><td style="background:linear-gradient(135deg,#2563eb,#0891b2);padding:36px 32px;text-align:center;border-radius:12px 12px 0 0;">'
+        . '<h1 style="color:#fff;margin:0;font-size:22px;font-weight:700;">' . $appName . '</h1>'
+        . '<p style="color:rgba(255,255,255,.85);margin:10px 0 0;font-size:14px;">' . $safeTitle . '</p>'
+        . '</td></tr>'
+        . '<tr><td style="background:#fff;padding:32px;border-left:1px solid #e5e7eb;border-right:1px solid #e5e7eb;">'
+        . '<div style="color:#374151;font-size:15px;line-height:1.7;">' . $safeMessage . '</div>'
+        . '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-top:28px;">'
+        . '<tr><td align="center">'
+        . '<a href="' . $url . '" style="display:inline-block;padding:12px 36px;background:#2563eb;color:#fff;text-decoration:none;border-radius:8px;font-size:15px;font-weight:600;">Go to Dashboard</a>'
+        . '</td></tr></table>'
+        . '<hr style="border:none;border-top:1px solid #e5e7eb;margin:28px 0 0;">'
+        . '<p style="color:#9ca3af;font-size:12px;margin:16px 0 0;line-height:1.5;">This is an automated notification from <strong>' . $appName . '</strong>.</p>'
+        . '</td></tr>'
+        . '</table>'
+        . '</td></tr></table>'
+        . '</body></html>';
 }
 
 function saveEnvSetting($key, $value)
