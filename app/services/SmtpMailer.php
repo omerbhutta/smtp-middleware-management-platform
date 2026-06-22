@@ -83,14 +83,10 @@ class SmtpMailer
     public static function sendPortalEmail($to, $subject, $body)
     {
         try {
-            $db = Database::getInstance();
-            $settings = $db->fetchAll("SELECT setting_key, setting_value FROM system_settings");
-            $config = [];
-            foreach ($settings as $s) {
-                $config[$s['setting_key']] = $s['setting_value'];
-            }
-            $smtpId = $config['portal_smtp_id'] ?? null;
+            $settings = new SystemSetting();
+            $smtpId = $settings->get('portal_smtp_id');
             if (!$smtpId) return ['status' => false, 'message' => 'Portal SMTP not configured'];
+            $db = Database::getInstance();
             $smtp = $db->fetchOne("SELECT * FROM smtp_accounts WHERE id = :id AND is_portal_smtp = 1 AND status = 'active'", ['id' => $smtpId]);
             if (!$smtp) return ['status' => false, 'message' => 'Portal SMTP account not found'];
             return self::send($smtp, $to, $subject, $body);

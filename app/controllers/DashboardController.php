@@ -12,27 +12,24 @@ class DashboardController
         $smtpAccount = new SmtpAccount();
         $suppression = new SuppressionCache();
 
-        $stats = [
-            'today_count'        => $emailLog->getTodayCount(),
-            'week_count'         => $emailLog->getWeekCount(),
-            'month_count'        => $emailLog->getMonthCount(),
-            'failed_count'       => $emailLog->getFailedCount(),
+        $dashboardCounts = $emailLog->getDashboardCounts();
+        $stats = $dashboardCounts + [
             'active_departments' => $department->countActive(),
             'active_keys'        => $securityKey->countActive(),
             'active_smtp'        => $smtpAccount->countActive(),
             'suppressed_count'   => $suppression->count(),
-            'skipped_count'      => $emailLog->getSkippedCount(),
             'skipped_breakdown'  => $emailLog->getSkippedBreakdown(),
         ];
 
+        $pct = $emailLog->getDashboardPercentChanges();
         $daily_volume = $emailLog->getDailyVolume(30);
         $skipped_daily_volume = $emailLog->getSkippedDailyVolume(30);
         $skipped_recipient_daily = $emailLog->getSkippedRecipientDailyVolume(30);
         $top_departments = $emailLog->getTopDepartments();
         $provider_usage = $smtpAccount->getUsageStats();
-        $week_pct = $emailLog->getWeeklyPercentChange();
-        $month_pct = $emailLog->getMonthlyPercentChange();
-        $failed_pct = $emailLog->getFailedPercentChange();
+        $week_pct = $pct['week_pct'];
+        $month_pct = $pct['month_pct'];
+        $failed_pct = $pct['failed_pct'];
         $skipped30 = $emailLog->getSkippedRecipientCount(30);
         $recent_activities = $emailLog->getAll([], 1, 10)['data'];
 

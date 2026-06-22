@@ -169,7 +169,7 @@ function activityEmailTemplate($title, $message)
         . '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f1f5f9;">'
         . '<tr><td align="center" style="padding:40px 16px;">'
         . '<table role="presentation" width="560" cellpadding="0" cellspacing="0" style="max-width:560px;width:100%;">'
-        . '<tr><td style="background:linear-gradient(135deg,#2563eb,#0891b2);padding:36px 32px;text-align:center;border-radius:12px 12px 0 0;">'
+        . '<tr><td style="background:#2563eb;background:linear-gradient(135deg,#2563eb,#0891b2);padding:36px 32px;text-align:center;border-radius:12px 12px 0 0;">'
         . '<h1 style="color:#fff;margin:0;font-size:22px;font-weight:700;">' . $appName . '</h1>'
         . '<p style="color:rgba(255,255,255,.85);margin:10px 0 0;font-size:14px;">' . $safeTitle . '</p>'
         . '</td></tr>'

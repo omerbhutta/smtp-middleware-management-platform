@@ -2,6 +2,7 @@
 class SystemSetting
 {
     private $db;
+    private static $cache = null;
 
     public function __construct()
     {
@@ -10,13 +11,18 @@ class SystemSetting
 
     public function getAll()
     {
-        return $this->db->fetchAll("SELECT * FROM system_settings");
+        $rows = $this->getAllAsArray();
+        $result = [];
+        foreach ($rows as $key => $value) {
+            $result[] = ['setting_key' => $key, 'setting_value' => $value];
+        }
+        return $result;
     }
 
     public function get($key)
     {
-        $row = $this->db->fetchOne("SELECT setting_value FROM system_settings WHERE setting_key = :key LIMIT 1", ['key' => $key]);
-        return $row ? $row['setting_value'] : null;
+        $all = $this->getAllAsArray();
+        return $all[$key] ?? null;
     }
 
     public function set($key, $value)
@@ -27,15 +33,20 @@ class SystemSetting
         } else {
             $this->db->insert('system_settings', ['setting_key' => $key, 'setting_value' => $value]);
         }
+        self::$cache = null;
     }
 
     public function getAllAsArray()
     {
-        $rows = $this->getAll();
+        if (self::$cache !== null) {
+            return self::$cache;
+        }
+        $rows = $this->db->fetchAll("SELECT setting_key, setting_value FROM system_settings");
         $result = [];
         foreach ($rows as $row) {
             $result[$row['setting_key']] = $row['setting_value'];
         }
+        self::$cache = $result;
         return $result;
     }
 }

@@ -79,6 +79,26 @@ class EmailLog
         return $this->db->insert('email_logs', $data);
     }
 
+    public function getDashboardCounts()
+    {
+        $row = $this->db->fetchOne("
+            SELECT
+                SUM(CASE WHEN DATE(created_at) = CURDATE() THEN 1 ELSE 0 END) as today_count,
+                SUM(CASE WHEN YEARWEEK(created_at) = YEARWEEK(CURDATE()) THEN 1 ELSE 0 END) as week_count,
+                SUM(CASE WHEN MONTH(created_at) = MONTH(CURDATE()) AND YEAR(created_at) = YEAR(CURDATE()) THEN 1 ELSE 0 END) as month_count,
+                SUM(CASE WHEN status = 'failed' THEN 1 ELSE 0 END) as failed_count,
+                SUM(CASE WHEN error_message LIKE 'Skipped:%' OR error_message LIKE '%| Skipped:%' THEN 1 ELSE 0 END) as skipped_count
+            FROM email_logs
+        ");
+        return [
+            'today_count'   => (int)($row['today_count'] ?? 0),
+            'week_count'    => (int)($row['week_count'] ?? 0),
+            'month_count'   => (int)($row['month_count'] ?? 0),
+            'failed_count'  => (int)($row['failed_count'] ?? 0),
+            'skipped_count' => (int)($row['skipped_count'] ?? 0),
+        ];
+    }
+
     public function getTodayCount()
     {
         return $this->db->fetchOne("SELECT COUNT(*) as count FROM email_logs WHERE DATE(created_at) = CURDATE()", [])['count'];
@@ -237,6 +257,26 @@ class EmailLog
             ORDER BY email_count DESC
             LIMIT :lim
         ", ['lim' => $limit]);
+    }
+
+    public function getDashboardPercentChanges()
+    {
+        $row = $this->db->fetchOne("
+            SELECT
+                SUM(CASE WHEN YEARWEEK(created_at) = YEARWEEK(CURDATE()) THEN 1 ELSE 0 END) as cur_week,
+                SUM(CASE WHEN YEARWEEK(created_at) = YEARWEEK(DATE_SUB(CURDATE(), INTERVAL 7 DAY)) THEN 1 ELSE 0 END) as prev_week,
+                SUM(CASE WHEN MONTH(created_at) = MONTH(CURDATE()) AND YEAR(created_at) = YEAR(CURDATE()) THEN 1 ELSE 0 END) as cur_month,
+                SUM(CASE WHEN MONTH(created_at) = MONTH(DATE_SUB(CURDATE(), INTERVAL 1 MONTH)) AND YEAR(created_at) = YEAR(DATE_SUB(CURDATE(), INTERVAL 1 MONTH)) THEN 1 ELSE 0 END) as prev_month,
+                SUM(CASE WHEN status = 'failed' THEN 1 ELSE 0 END) as cur_failed,
+                SUM(CASE WHEN status = 'failed' AND MONTH(created_at) = MONTH(DATE_SUB(CURDATE(), INTERVAL 1 MONTH)) AND YEAR(created_at) = YEAR(DATE_SUB(CURDATE(), INTERVAL 1 MONTH)) THEN 1 ELSE 0 END) as prev_failed
+            FROM email_logs
+        ");
+        $calc = fn($cur, $prev) => $prev == 0 ? ($cur > 0 ? 100 : 0) : round((($cur - $prev) / $prev) * 100, 1);
+        return [
+            'week_pct'   => $calc((int)$row['cur_week'], (int)$row['prev_week']),
+            'month_pct'  => $calc((int)$row['cur_month'], (int)$row['prev_month']),
+            'failed_pct' => $calc((int)$row['cur_failed'], (int)$row['prev_failed']),
+        ];
     }
 
     public function getWeeklyPercentChange()

@@ -44,71 +44,35 @@ if (!file_exists(INSTALLER_LOCK_FILE)) {
 
 try {
     $db = Database::getInstance();
-
-    // Auto-migrate: add theme / sidebar_state columns if missing
     $pdo = $db->getConnection();
-    try {
-        $pdo->exec("ALTER TABLE `users` ADD COLUMN `theme` VARCHAR(10) DEFAULT 'dark' AFTER `last_login`");
-    } catch (PDOException $e) {
-        // column already exists, ignore
-    }
-    try {
-        $pdo->exec("ALTER TABLE `users` ADD COLUMN `sidebar_state` VARCHAR(10) DEFAULT 'collapsed' AFTER `theme`");
-    } catch (PDOException $e) {
-        // column already exists, ignore
-    }
 
-    // Auto-migration: add department_id column for user-department association
-    try {
-        $pdo->exec("ALTER TABLE `users` ADD COLUMN `department_id` INT NULL AFTER `role`");
-    } catch (PDOException $e) {
-        // column already exists
-    }
-
-    // Auto-migration: add full_name column
-    try {
-        $pdo->exec("ALTER TABLE `users` ADD COLUMN `full_name` VARCHAR(255) NULL AFTER `username`");
-    } catch (PDOException $e) {
-        // column already exists
-    }
-
-    // Auto-migration: add total_recipients column to email_logs
-    try {
-        $pdo->exec("ALTER TABLE `email_logs` ADD COLUMN `total_recipients` INT NULL DEFAULT NULL AFTER `recipient_count`");
-    } catch (PDOException $e) {
-        // column already exists
-    }
-
-    // Auto-migration: add ms_id column for Microsoft login
-    try {
-        $pdo->exec("ALTER TABLE `users` ADD COLUMN `ms_id` VARCHAR(255) NULL DEFAULT NULL AFTER `id`");
-    } catch (PDOException $e) {
-        // column already exists
-    }
-
-    // Auto-migration: update role ENUM from admin/manager to admin/user
-    try {
-        $pdo->exec("UPDATE `users` SET `role` = 'admin' WHERE `role` NOT IN ('admin','user')");
-        $pdo->exec("ALTER TABLE `users` MODIFY COLUMN `role` ENUM('admin','user') NOT NULL DEFAULT 'admin'");
-    } catch (PDOException $e) {
-        // migration already applied or column type can't be changed
-    }
-
-    // Auto-migration: create deploy_logs table
-    try {
-        $pdo->exec("CREATE TABLE IF NOT EXISTS `deploy_logs` (
-            `id` INT AUTO_INCREMENT PRIMARY KEY,
-            `user_id` INT NULL,
-            `action` VARCHAR(100) NOT NULL,
-            `branch` VARCHAR(255) NULL,
-            `previous_commit` VARCHAR(255) NULL,
-            `output` LONGTEXT NULL,
-            `status` VARCHAR(50) NOT NULL DEFAULT 'running',
-            `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
-    } catch (PDOException $e) {
-        // table already exists
+    $migrationFile = STORAGE_PATH . '.migrations_applied';
+    if (!file_exists($migrationFile)) {
+        $migrations = [
+            "ALTER TABLE `users` ADD COLUMN `theme` VARCHAR(10) DEFAULT 'dark' AFTER `last_login`",
+            "ALTER TABLE `users` ADD COLUMN `sidebar_state` VARCHAR(10) DEFAULT 'collapsed' AFTER `theme`",
+            "ALTER TABLE `users` ADD COLUMN `department_id` INT NULL AFTER `role`",
+            "ALTER TABLE `users` ADD COLUMN `full_name` VARCHAR(255) NULL AFTER `username`",
+            "ALTER TABLE `email_logs` ADD COLUMN `total_recipients` INT NULL DEFAULT NULL AFTER `recipient_count`",
+            "ALTER TABLE `users` ADD COLUMN `ms_id` VARCHAR(255) NULL DEFAULT NULL AFTER `id`",
+            "UPDATE `users` SET `role` = 'admin' WHERE `role` NOT IN ('admin','user')",
+            "ALTER TABLE `users` MODIFY COLUMN `role` ENUM('admin','user') NOT NULL DEFAULT 'admin'",
+            "CREATE TABLE IF NOT EXISTS `deploy_logs` (
+                `id` INT AUTO_INCREMENT PRIMARY KEY,
+                `user_id` INT NULL,
+                `action` VARCHAR(100) NOT NULL,
+                `branch` VARCHAR(255) NULL,
+                `previous_commit` VARCHAR(255) NULL,
+                `output` LONGTEXT NULL,
+                `status` VARCHAR(50) NOT NULL DEFAULT 'running',
+                `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4",
+        ];
+        foreach ($migrations as $sql) {
+            try { $pdo->exec($sql); } catch (PDOException $e) {}
+        }
+        @file_put_contents($migrationFile, date('Y-m-d H:i:s'));
     }
 
     $settings = new SystemSetting();

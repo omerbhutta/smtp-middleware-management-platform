@@ -188,6 +188,7 @@ class UsersController
             header('Location: ' . BASE_URL . 'users');
             exit;
         }
+        $userModel = new User();
         $userToDelete = $userModel->getById($id);
         $userModel->delete($id);
         if ($userToDelete) {
