@@ -4,7 +4,7 @@
  *
  * Accepts email send requests via security key authentication.
  *
- * Request params: security, subject, to, body, from, bcc, attachmentURL, attachmentEncoding, attachmentType
+ * Request params: security, subject, to, body, from, cc, bcc, attachmentURL, attachmentEncoding, attachmentType
  * Response: {"status": true/false, "message": "..."}
  */
 
@@ -52,6 +52,7 @@ $subject     = $_REQUEST['subject'] ?? '';
 $to          = $_REQUEST['to'] ?? '';
 $body        = $_REQUEST['body'] ?? '';
 $from        = $_REQUEST['from'] ?? '';
+$cc          = $_REQUEST['cc'] ?? '';
 $bcc         = $_REQUEST['bcc'] ?? '';
 $attachmentURL      = $_REQUEST['attachmentURL'] ?? '';
 $attachmentEncoding = $_REQUEST['attachmentEncoding'] ?? 'base64';
@@ -59,6 +60,11 @@ $attachmentType     = $_REQUEST['attachmentType'] ?? 'application/pdf';
 
 if (empty($securityKey)) {
     echo json_encode(['status' => false, 'message' => 'Bad request']);
+    exit;
+}
+
+if (empty($from)) {
+    echo json_encode(['status' => false, 'message' => 'from parameter is required']);
     exit;
 }
 
@@ -205,7 +211,8 @@ $result = SmtpMailer::send(
     $from ?: null,
     null,
     $bcc,
-    $attachments
+    $attachments,
+    $cc
 );
 
 // Build log message with skipped recipient details

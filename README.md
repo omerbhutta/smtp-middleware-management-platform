@@ -92,7 +92,8 @@ security=<api_key>&subject=Hello&to=user@example.com&body=<h1>Test</h1>&from=sen
 | `subject` | Yes | Email subject |
 | `to` | Yes | Recipient email (comma-separated for multiple) |
 | `body` | Yes | HTML email body |
-| `from` | No | Sender email (defaults to SMTP account sender) |
+| `from` | Yes | Sender email |
+| `cc` | No | CC recipients (comma-separated) |
 | `bcc` | No | BCC recipients (comma-separated) |
 | `attachmentURL` | No | URL of file to attach |
 | `attachmentEncoding` | No | `base64` or `raw` |

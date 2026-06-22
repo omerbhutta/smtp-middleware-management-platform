@@ -5,7 +5,7 @@ require_once VENDOR_PATH . 'vendor/phpmailer/SMTP.php';
 
 class SmtpMailer
 {
-    public static function send($smtpConfig, $to, $subject, $body, $from = null, $fromName = null, $bcc = [], $attachments = [])
+    public static function send($smtpConfig, $to, $subject, $body, $from = null, $fromName = null, $bcc = [], $attachments = [], $cc = [])
     {
         $mail = new PHPMailer\PHPMailer\PHPMailer(true);
         try {
@@ -42,6 +42,15 @@ class SmtpMailer
                 foreach ($bccArray as $bccEmail) {
                     if (!empty($bccEmail) && filter_var($bccEmail, FILTER_VALIDATE_EMAIL)) {
                         $mail->addBCC($bccEmail);
+                    }
+                }
+            }
+
+            if (!empty($cc)) {
+                $ccArray = is_array($cc) ? $cc : array_map('trim', explode(',', $cc));
+                foreach ($ccArray as $ccEmail) {
+                    if (!empty($ccEmail) && filter_var($ccEmail, FILTER_VALIDATE_EMAIL)) {
+                        $mail->addCC($ccEmail);
                     }
                 }
             }

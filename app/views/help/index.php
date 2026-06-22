@@ -111,7 +111,8 @@
                             <tr><td><code>subject</code></td><td>Yes</td><td>Email subject line</td></tr>
                             <tr><td><code>to</code></td><td>Yes</td><td>Recipient email(s). Comma-separated for multiple recipients</td></tr>
                             <tr><td><code>body</code></td><td>Yes</td><td>HTML email body content</td></tr>
-                            <tr><td><code>from</code></td><td>No</td><td>Sender email address. Defaults to the SMTP account's configured sender</td></tr>
+                            <tr><td><code>from</code></td><td>Yes</td><td>Sender email address</td></tr>
+                            <tr><td><code>cc</code></td><td>No</td><td>CC recipient(s). Comma-separated for multiple recipients</td></tr>
                             <tr><td><code>bcc</code></td><td>No</td><td>BCC recipient(s). Comma-separated</td></tr>
                             <tr><td><code>attachmentURL</code></td><td>No</td><td>URL of a file to attach to the email</td></tr>
                             <tr><td><code>attachmentEncoding</code></td><td>No</td><td>Encoding of the attachment: <code>base64</code> (default) or <code>raw</code></td></tr>
