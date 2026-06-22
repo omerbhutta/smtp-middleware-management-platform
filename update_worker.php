@@ -23,6 +23,24 @@ $dbPass = $_ENV['DB_PASSWORD'] ?? '';
 $action = $argv[1] ?? 'pull';
 $userId = (int)($argv[2] ?? 0);
 
+// Prevent concurrent updates
+define('LOCK_FILE', __DIR__ . '/.update_lock');
+$lockFp = @fopen(LOCK_FILE, 'c');
+if (!$lockFp || !flock($lockFp, LOCK_EX | LOCK_NB)) {
+    echo json_encode([
+        'success' => false,
+        'output' => 'Another update is already in progress. Please wait and try again.',
+        'new_commit' => '',
+        'error' => 'Lock acquisition failed. Concurrent update detected.',
+    ]);
+    exit(1);
+}
+register_shutdown_function(function () use ($lockFp) {
+    flock($lockFp, LOCK_UN);
+    fclose($lockFp);
+    @unlink(LOCK_FILE);
+});
+
 function runGit(array $args) {
     $descriptorspec = [
         0 => ['pipe', 'r'],
@@ -95,14 +113,21 @@ if ($action === 'full') {
     $output .= "========== Step 2: git reset --hard origin/{$currentBranch} ==========\n" . $reset['stdout'] . "\n" . $reset['stderr'] . "\n\n";
     $resetOk = $reset['exitCode'] === 0;
 
-    $success = $fetchOk && $resetOk;
+    // Step 3: Clean untracked files to prevent phantom "local changes"
+    $clean = runGit(['clean', '-fd']);
+    $output .= "========== Step 3: git clean -fd ==========\n" . $clean['stdout'] . "\n" . $clean['stderr'] . "\n\n";
+    $cleanOk = $clean['exitCode'] === 0;
+
+    $success = $fetchOk && $resetOk && $cleanOk;
 } else {
     // Simple pull
     $fetch = runGit(['fetch', 'origin']);
     $output .= "> git fetch origin\n" . $fetch['stdout'] . "\n" . $fetch['stderr'] . "\n";
     $reset = runGit(['reset', '--hard', "origin/{$currentBranch}"]);
     $output .= "> git reset --hard origin/{$currentBranch}\n" . $reset['stdout'] . "\n" . $reset['stderr'] . "\n";
-    $success = $fetch['exitCode'] === 0 && $reset['exitCode'] === 0;
+    $clean = runGit(['clean', '-fd']);
+    $output .= "> git clean -fd\n" . $clean['stdout'] . "\n" . $clean['stderr'] . "\n";
+    $success = $fetch['exitCode'] === 0 && $reset['exitCode'] === 0 && $clean['exitCode'] === 0;
 }
 
 $newCommit = getCommit();

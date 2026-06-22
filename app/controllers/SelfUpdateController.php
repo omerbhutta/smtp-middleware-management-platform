@@ -231,10 +231,14 @@ class SelfUpdateController
         $output .= "> git reset --hard origin/{$currentBranch}\n" . $reset['stdout'] . "\n" . $reset['stderr'] . "\n";
         $resetOk = $reset['exitCode'] === 0;
 
+        $clean = $this->runGit(['clean', '-fd']);
+        $output .= "> git clean -fd\n" . $clean['stdout'] . "\n" . $clean['stderr'] . "\n";
+        $cleanOk = $clean['exitCode'] === 0;
+
         $r = $this->runGit(['log', '-1', '--format=%h | %ci']);
         $newCommit = $r['exitCode'] === 0 ? $r['stdout'] : 'Unknown';
 
-        $success = $fetchOk && $resetOk;
+        $success = $fetchOk && $resetOk && $cleanOk;
 
         return [
             'success' => $success,
