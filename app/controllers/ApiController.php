@@ -63,14 +63,14 @@ class ApiController
             $smtpConfig = $smtp;
         }
 
-        $toArray = is_array($to) ? $to : array_map('trim', explode(',', $to));
+        $toArray = splitRecipients($to);
         $ccArray = [];
         if ($cc) {
-            $ccArray = is_array($cc) ? $cc : array_map('trim', explode(',', $cc));
+            $ccArray = splitRecipients($cc);
         }
         $bccArray = [];
         if ($bcc) {
-            $bccArray = is_array($bcc) ? $bcc : array_map('trim', explode(',', $bcc));
+            $bccArray = splitRecipients($bcc);
         }
 
         $attachments = [];

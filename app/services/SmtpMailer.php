@@ -30,7 +30,7 @@ class SmtpMailer
             $senderName  = $fromName ?: ($smtpConfig['sender_name'] ?? '');
             $mail->setFrom($senderEmail, $senderName);
 
-            $toArray = is_array($to) ? $to : array_map('trim', explode(',', $to));
+            $toArray = splitRecipients($to);
             foreach ($toArray as $email) {
                 if (filter_var($email, FILTER_VALIDATE_EMAIL)) {
                     $mail->addAddress($email);
@@ -38,7 +38,7 @@ class SmtpMailer
             }
 
             if (!empty($bcc)) {
-                $bccArray = is_array($bcc) ? $bcc : array_map('trim', explode(',', $bcc));
+                $bccArray = splitRecipients($bcc);
                 foreach ($bccArray as $bccEmail) {
                     if (!empty($bccEmail) && filter_var($bccEmail, FILTER_VALIDATE_EMAIL)) {
                         $mail->addBCC($bccEmail);
@@ -47,7 +47,7 @@ class SmtpMailer
             }
 
             if (!empty($cc)) {
-                $ccArray = is_array($cc) ? $cc : array_map('trim', explode(',', $cc));
+                $ccArray = splitRecipients($cc);
                 foreach ($ccArray as $ccEmail) {
                     if (!empty($ccEmail) && filter_var($ccEmail, FILTER_VALIDATE_EMAIL)) {
                         $mail->addCC($ccEmail);

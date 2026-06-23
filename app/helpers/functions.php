@@ -19,6 +19,12 @@ function escape($str)
     return htmlspecialchars($str ?? '', ENT_QUOTES, 'UTF-8');
 }
 
+function splitRecipients($str)
+{
+    if (is_array($str)) return $str;
+    return array_values(array_filter(array_map('trim', explode(',', str_replace(';', ',', $str))), fn($e) => $e !== ''));
+}
+
 function truncate($str, $length = 50)
 {
     if (mb_strlen($str) <= $length) return $str;
