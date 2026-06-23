@@ -42,18 +42,19 @@
                     <tr>
                         <td>
                             <?php
+                            $hasRecipients = !empty(trim($log['recipients'] ?? ''));
                             $totalReq = $log['total_recipients'] ?? $log['recipient_count'];
                             $delivered = $log['recipient_count'];
                             $skippedCt = $totalReq - $delivered;
                             ?>
                             <div style="font-size:0.82rem;color:var(--text-primary);font-weight:600;">
-                                <?php if ($totalReq > 0): ?>
+                                <?php if ($hasRecipients): ?>
                                     <?= $totalReq ?> recipient<?= $totalReq != 1 ? 's' : '' ?>
                                 <?php else: ?>
                                     No recipients
                                 <?php endif; ?>
                             </div>
-                            <?php if ($totalReq > 0): ?>
+                            <?php if ($hasRecipients): ?>
                             <div style="display:flex;gap:8px;margin-top:2px;">
                                 <span style="font-size:0.7rem;color:var(--emerald);"><i class="fas fa-check-circle" style="font-size:0.6rem;"></i> <?= $delivered ?> delivered</span>
                                 <?php if ($skippedCt > 0): ?>

@@ -18,11 +18,12 @@
                 <div style="background:var(--bg-card);border:1px solid var(--border-color);border-radius:var(--radius-sm);padding:16px;">
                     <div class="tile-stat mb-2"><span class="tile-stat-label">Recipients Breakdown</span><span class="tile-stat-value">
                         <?php
+                        $hasRecipients = !empty(trim($log['recipients'] ?? ''));
                         $totalReq = $log['total_recipients'] ?? $log['recipient_count'];
                         $delivered = $log['recipient_count'];
                         $skippedCt = $totalReq - $delivered;
                         ?>
-                        <?php if ($totalReq > 0): ?>
+                        <?php if ($hasRecipients): ?>
                         <span style="color:var(--text-primary);font-weight:600;"><?= $totalReq ?> total</span>
                         <span class="badge-smm badge-smm-success" style="font-size:0.6rem;vertical-align:middle;"><?= $delivered ?> delivered</span>
                         <?php if ($skippedCt > 0): ?>

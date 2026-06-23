@@ -124,7 +124,7 @@ try {
     // Silently fall back to empty list
 }
 
-$recipientArray = array_map('trim', explode(',', $to));
+$recipientArray = array_values(array_filter(array_map('trim', explode(',', $to)), fn($e) => $e !== ''));
 
 // Filter out forbidden and suppressed recipients
 $suppression = new SuppressionCache();
