@@ -124,6 +124,9 @@ class SelfUpdateController
 
         header('Content-Type: application/json');
 
+        $maintenanceFile = BASE_PATH . 'app/storage/.maintenance';
+        @file_put_contents($maintenanceFile, 'The system is being updated. Please wait...');
+
         try {
             $data = $this->runWorker('pull');
         } catch (Exception $e) {
@@ -133,6 +136,8 @@ class SelfUpdateController
         if (!$data || !isset($data['success'])) {
             $data = $this->runDirect('self_update');
         }
+
+        @unlink($maintenanceFile);
 
         $logModel = new DeployLog();
         $logModel->create([
@@ -154,6 +159,9 @@ class SelfUpdateController
 
         header('Content-Type: application/json');
 
+        $maintenanceFile = BASE_PATH . 'app/storage/.maintenance';
+        @file_put_contents($maintenanceFile, 'The system is being updated. Please wait...');
+
         try {
             $data = $this->runWorker('full');
         } catch (Exception $e) {
@@ -163,6 +171,8 @@ class SelfUpdateController
         if (!$data || !isset($data['success'])) {
             $data = $this->runDirect('self_full_update');
         }
+
+        @unlink($maintenanceFile);
 
         $logModel = new DeployLog();
         $logModel->create([
@@ -215,6 +225,10 @@ class SelfUpdateController
 
     private function runDirect(string $action): array
     {
+        // Maintenance mode
+        $maintenanceFile = BASE_PATH . 'app/storage/.maintenance';
+        @file_put_contents($maintenanceFile, 'The system is being updated. Please wait...');
+
         $currentBranch = 'main';
         $r = $this->runGit(['rev-parse', '--abbrev-ref', 'HEAD']);
         if ($r['exitCode'] === 0) {
@@ -239,6 +253,8 @@ class SelfUpdateController
         $newCommit = $r['exitCode'] === 0 ? $r['stdout'] : 'Unknown';
 
         $success = $fetchOk && $resetOk && $cleanOk;
+
+        @unlink($maintenanceFile);
 
         return [
             'success' => $success,

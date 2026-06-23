@@ -42,6 +42,26 @@ if (!file_exists(INSTALLER_LOCK_FILE)) {
     exit;
 }
 
+// Maintenance mode check
+$maintenanceFile = STORAGE_PATH . '.maintenance';
+if (file_exists($maintenanceFile)) {
+    $isUpdateRoute = isset($_GET['route']) && strpos($_GET['route'], 'self_update') === 0;
+    if (!$isUpdateRoute) {
+        $maintenanceMsg = @file_get_contents($maintenanceFile) ?: 'The system is currently undergoing maintenance. Please check back shortly.';
+        http_response_code(503);
+        ?>
+        <!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><title>Maintenance - SMMP</title>
+        <style>body{background:#0f172a;color:#e2e8f0;font-family:system-ui,sans-serif;display:flex;align-items:center;justify-content:center;min-height:100vh;margin:0;text-align:center;}
+        .maint-box{max-width:480px;padding:40px;}
+        .maint-icon{font-size:3rem;margin-bottom:16px;display:block;}
+        h1{font-size:1.5rem;margin:0 0 8px;font-weight:600;}
+        p{color:#94a3b8;font-size:0.9rem;line-height:1.5;margin:0;}</style></head>
+        <body><div class="maint-box"><span class="maint-icon">&#9881;</span><h1>Under Maintenance</h1><p><?= htmlspecialchars($maintenanceMsg, ENT_QUOTES) ?></p></div></body></html>
+        <?php
+        exit;
+    }
+}
+
 try {
     $db = Database::getInstance();
     $pdo = $db->getConnection();

@@ -11,6 +11,9 @@ app/storage/installed.lock
 app/storage/.migrations_applied
 app/storage/.migrations_applied_v2
 
+# Maintenance mode flag (created during deployments)
+app/storage/.maintenance
+
 # Update lock
 .update_lock
 

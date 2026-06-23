@@ -1,4 +1,7 @@
+DirectoryIndex index.php
+
 RewriteEngine On
+RewriteBase /
 
 # API endpoint (clean URL)
 RewriteRule ^api/send$ api/send.php [L,QSA]

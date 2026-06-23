@@ -97,10 +97,19 @@ try {
     // Can't log to DB, but we can still run git
 }
 
+// Maintenance mode — prevent requests during the update
+$maintenanceFile = __DIR__ . '/app/storage/.maintenance';
+@file_put_contents($maintenanceFile, 'The system is being updated. Please wait...');
+
 $currentBranch = getBranch();
 $oldCommit = getCommit();
 $output = '';
 $success = false;
+
+// Clean up maintenance file after update
+register_shutdown_function(function () use ($maintenanceFile) {
+    @unlink($maintenanceFile);
+});
 
 if ($action === 'full') {
     // Step 1: Fetch
