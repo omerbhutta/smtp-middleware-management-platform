@@ -57,6 +57,11 @@ $bcc         = $_REQUEST['bcc'] ?? '';
 $attachmentURL      = $_REQUEST['attachmentURL'] ?? '';
 $attachmentEncoding = $_REQUEST['attachmentEncoding'] ?? 'base64';
 $attachmentType     = $_REQUEST['attachmentType'] ?? 'application/pdf';
+$attachmentData     = $_REQUEST['attachmentData'] ?? '';
+$attachmentName     = $_REQUEST['attachmentName'] ?? '';
+$attachmentDataEncoding = $_REQUEST['attachmentDataEncoding'] ?? 'base64';
+$priority   = $_REQUEST['priority'] ?? null;
+$replyTo    = $_REQUEST['replyTo'] ?? '';
 
 if (empty($securityKey)) {
     echo json_encode(['status' => false, 'message' => 'Bad request']);
@@ -193,12 +198,38 @@ if (!empty($from)) {
 
 // Prepare attachments
 $attachments = [];
+
+// Multiple URL-based attachments (comma-separated URLs)
 if (!empty($attachmentURL)) {
-    $attachments[] = [
-        'url'      => $attachmentURL,
-        'encoding' => $attachmentEncoding,
-        'type'     => $attachmentType,
-    ];
+    $urls = splitRecipients($attachmentURL);
+    $types = $attachmentType ? splitRecipients($attachmentType) : [];
+    foreach ($urls as $i => $url) {
+        $attachments[] = [
+            'url'      => $url,
+            'encoding' => $attachmentEncoding,
+            'type'     => $types[$i] ?? 'application/octet-stream',
+        ];
+    }
+}
+
+// Raw binary attachments (base64-encoded data)
+if (!empty($attachmentData)) {
+    $dataItems = is_array($attachmentData) ? $attachmentData : [$attachmentData];
+    $names = is_array($attachmentName) ? $attachmentName : ($attachmentName ? [$attachmentName] : []);
+    $dataTypes = is_array($attachmentType) ? $attachmentType : ($attachmentType ? [$attachmentType] : []);
+    foreach ($dataItems as $i => $data) {
+        if (!empty($data)) {
+            $decoded = $attachmentDataEncoding === 'base64' ? base64_decode($data, true) : $data;
+            if ($decoded !== false) {
+                $attachments[] = [
+                    'data'     => $decoded,
+                    'name'     => $names[$i] ?? 'attachment_' . ($i + 1),
+                    'type'     => $dataTypes[$i] ?? 'application/octet-stream',
+                    'encoding' => $attachmentDataEncoding,
+                ];
+            }
+        }
+    }
 }
 
 // Send email to valid recipients only
@@ -212,7 +243,9 @@ $result = SmtpMailer::send(
     null,
     $bcc,
     $attachments,
-    $cc
+    $cc,
+    $priority,
+    $replyTo ?: null
 );
 
 // Build log message with skipped recipient details
@@ -239,7 +272,7 @@ try {
         'recipients'        => $recipientsStr,
         'cc'               => $ccStr,
         'bcc'              => $bccStr,
-        'has_attachment'    => !empty($attachmentURL) ? 1 : 0,
+        'has_attachment'    => (!empty($attachmentURL) || !empty($attachmentData)) ? 1 : 0,
         'recipient_count'   => $totalValid,
         'total_recipients'  => $totalRequested,
         'subject'           => $subject,

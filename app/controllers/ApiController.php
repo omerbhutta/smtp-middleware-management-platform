@@ -34,6 +34,8 @@ class ApiController
         $fromName = $_POST['from_name'] ?? null;
         $cc = $_POST['cc'] ?? null;
         $bcc = $_POST['bcc'] ?? null;
+        $priority = $_POST['priority'] ?? null;
+        $replyTo = $_POST['reply_to'] ?? null;
 
         if (!$to || !$subject || !$body || !$from) {
             http_response_code(400);
@@ -88,7 +90,7 @@ class ApiController
             }
         }
 
-        $result = SmtpMailer::send($smtpConfig, $toArray, $subject, $body, $from, $fromName, $bccArray, $attachments, $ccArray);
+        $result = SmtpMailer::send($smtpConfig, $toArray, $subject, $body, $from, $fromName, $bccArray, $attachments, $ccArray, $priority, $replyTo);
 
         try {
             $logModel = new EmailLog();

@@ -5,7 +5,7 @@ require_once VENDOR_PATH . 'vendor/phpmailer/SMTP.php';
 
 class SmtpMailer
 {
-    public static function send($smtpConfig, $to, $subject, $body, $from = null, $fromName = null, $bcc = [], $attachments = [], $cc = [])
+    public static function send($smtpConfig, $to, $subject, $body, $from = null, $fromName = null, $bcc = [], $attachments = [], $cc = [], $priority = null, $replyTo = null)
     {
         $mail = new PHPMailer\PHPMailer\PHPMailer(true);
         try {
@@ -29,6 +29,14 @@ class SmtpMailer
             $senderEmail = $from ?: $smtpConfig['sender_email'];
             $senderName  = $fromName ?: ($smtpConfig['sender_name'] ?? '');
             $mail->setFrom($senderEmail, $senderName);
+
+            if (!empty($replyTo)) {
+                $mail->addReplyTo($replyTo);
+            }
+
+            if ($priority !== null) {
+                $mail->Priority = (int)$priority;
+            }
 
             $toArray = splitRecipients($to);
             foreach ($toArray as $email) {
@@ -57,7 +65,9 @@ class SmtpMailer
 
             if (!empty($attachments)) {
                 foreach ($attachments as $att) {
-                    if (isset($att['path'])) {
+                    if (isset($att['data'])) {
+                        $mail->addStringAttachment($att['data'], $att['name'] ?? 'attachment', $att['encoding'] ?? 'base64', $att['type'] ?? 'application/octet-stream');
+                    } elseif (isset($att['path'])) {
                         $mail->addAttachment($att['path'], $att['name'] ?? '', $att['encoding'] ?? 'base64', $att['type'] ?? 'application/octet-stream');
                     } elseif (isset($att['url'])) {
                         $content = @file_get_contents($att['url']);
