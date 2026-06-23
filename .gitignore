@@ -10,6 +10,7 @@ app/storage/installed.lock
 # Migration lock files (environment-specific)
 app/storage/.migrations_applied
 app/storage/.migrations_applied_v2
+app/storage/.migrations_applied_v3
 
 # Maintenance mode flag (created during deployments)
 app/storage/.maintenance

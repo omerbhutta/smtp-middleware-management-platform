@@ -108,6 +108,19 @@ try {
         @file_put_contents($migrationFile2, date('Y-m-d H:i:s'));
     }
 
+    $migrationFile3 = STORAGE_PATH . '.migrations_applied_v3';
+    if (!file_exists($migrationFile3)) {
+        $migrationsV3 = [
+            "ALTER TABLE `email_logs` ADD COLUMN `priority` TINYINT DEFAULT NULL AFTER `has_attachment`",
+            "ALTER TABLE `email_logs` ADD COLUMN `reply_to` VARCHAR(255) DEFAULT NULL AFTER `priority`",
+            "ALTER TABLE `email_logs` ADD COLUMN `attachment_count` INT NOT NULL DEFAULT 0 AFTER `reply_to`",
+        ];
+        foreach ($migrationsV3 as $sql) {
+            try { $pdo->exec($sql); } catch (PDOException $e) {}
+        }
+        @file_put_contents($migrationFile3, date('Y-m-d H:i:s'));
+    }
+
     $settings = new SystemSetting();
     $appSettings = $settings->getAllAsArray();
     date_default_timezone_set($appSettings['app_timezone'] ?? 'UTC');

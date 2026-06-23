@@ -97,12 +97,21 @@ if (!$keyRecord) {
     }
     $keyRecord = $keyModel->getBySecretKey($securityKey);
     if (!$keyRecord) {
-        $keyId = $keyModel->create([
-            'department_id' => $legacyDept['id'],
-            'api_key'       => $securityKey,
-            'secret_key'    => $securityKey,
-        ]);
-        $keyRecord = $keyModel->getById($keyId);
+        try {
+            $keyId = $keyModel->create([
+                'department_id' => $legacyDept['id'],
+                'api_key'       => $securityKey,
+                'secret_key'    => $securityKey,
+                'status'        => 'active',
+            ]);
+            $keyRecord = $keyModel->getById($keyId);
+        } catch (PDOException $e) {
+            // Race condition: another request created the same key between our check and insert
+            $keyRecord = $keyModel->getByApiKey($securityKey);
+            if (!$keyRecord) {
+                $keyRecord = $keyModel->getBySecretKey($securityKey);
+            }
+        }
     }
 }
 
@@ -273,6 +282,9 @@ try {
         'cc'               => $ccStr,
         'bcc'              => $bccStr,
         'has_attachment'    => (!empty($attachmentURL) || !empty($attachmentData)) ? 1 : 0,
+        'attachment_count'  => count($attachments),
+        'priority'          => $priority,
+        'reply_to'          => $replyTo ?: null,
         'recipient_count'   => $totalValid,
         'total_recipients'  => $totalRequested,
         'subject'           => $subject,

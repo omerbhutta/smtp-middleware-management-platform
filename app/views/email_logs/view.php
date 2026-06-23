@@ -60,9 +60,33 @@
         </div>
         <?php endif; ?>
         <div class="hero-stat">
-            <div class="hero-stat-value" style="font-size:1.1rem;"><?= !empty($log['has_attachment']) ? '<span style="color:var(--blue-primary);"><i class="fas fa-paperclip"></i> Yes</span>' : '<span style="color:var(--text-muted);">No</span>' ?></div>
+            <div class="hero-stat-value" style="font-size:1.1rem;">
+                <?php if (!empty($log['has_attachment'])): ?>
+                    <span style="color:var(--blue-primary);"><i class="fas fa-paperclip"></i> <?= (int)($log['attachment_count'] ?? 1) ?> file<?= ($log['attachment_count'] ?? 1) != 1 ? 's' : '' ?></span>
+                <?php else: ?>
+                    <span style="color:var(--text-muted);">No</span>
+                <?php endif; ?>
+            </div>
             <div class="hero-stat-label">Attachments</div>
         </div>
+        <div class="hero-stat">
+            <div class="hero-stat-value" style="font-size:1.1rem;">
+                <?php if (isset($log['priority']) && $log['priority'] === 1): ?>
+                    <span style="color:var(--red);">High</span>
+                <?php elseif (isset($log['priority']) && $log['priority'] === 5): ?>
+                    <span style="color:var(--text-muted);">Low</span>
+                <?php else: ?>
+                    <span style="color:var(--text-muted);">Normal</span>
+                <?php endif; ?>
+            </div>
+            <div class="hero-stat-label">Priority</div>
+        </div>
+        <?php if (!empty($log['reply_to'])): ?>
+        <div class="hero-stat">
+            <div class="hero-stat-value" style="color:var(--cyan);font-size:1.1rem;"><?= escape($log['reply_to']) ?></div>
+            <div class="hero-stat-label">Reply-To</div>
+        </div>
+        <?php endif; ?>
     </div>
 </div>
 
@@ -114,6 +138,10 @@
                 <div class="tile-stat mb-2"><span class="tile-stat-label">Sender Email</span><span class="tile-stat-value"><?= escape($log['sender_email'] ?? 'N/A') ?></span></div>
                 <div class="tile-stat mb-2"><span class="tile-stat-label">Source IP</span><span class="tile-stat-value"><code style="background:rgba(0,0,0,0.3);padding:2px 8px;border-radius:4px;font-size:0.78rem;"><?= escape($log['source_ip'] ?? 'N/A') ?></code></span></div>
                 <div class="tile-stat mb-2"><span class="tile-stat-label">API Key</span><span class="tile-stat-value"><code style="background:rgba(59,130,246,0.15);color:var(--blue-primary);padding:2px 8px;border-radius:4px;font-size:0.78rem;"><?php if ($log['api_key']): ?><?= escape(substr($log['api_key'], 0, 4)) ?>...<?= escape(substr($log['api_key'], -4)) ?><?php else: ?>-<?php endif; ?></code></span></div>
+                <div class="tile-stat mb-2"><span class="tile-stat-label">Priority</span><span class="tile-stat-value"><?php if (isset($log['priority']) && $log['priority'] === 1): ?><span style="color:var(--red);">High</span><?php elseif (isset($log['priority']) && $log['priority'] === 5): ?><span style="color:var(--text-muted);">Low</span><?php else: ?><span style="color:var(--text-muted);">Normal</span><?php endif; ?></span></div>
+                <?php if (!empty($log['reply_to'])): ?>
+                <div class="tile-stat mb-2"><span class="tile-stat-label">Reply-To</span><span class="tile-stat-value" style="color:var(--cyan);"><?= escape($log['reply_to']) ?></span></div>
+                <?php endif; ?>
                 <div class="tile-stat"><span class="tile-stat-label">Created</span><span class="tile-stat-value"><?= date('M j, Y H:i:s', strtotime($log['created_at'])) ?></span></div>
             </div>
         </div>

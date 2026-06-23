@@ -75,6 +75,7 @@
                     <tr>
                         <th><a href="<?= sortUrl('recipients', $_GET['sort'] ?? '', $_GET['order'] ?? '') ?>" class="sort-link">Recipients <?= sortIcon('recipients', $_GET['sort'] ?? '', $_GET['order'] ?? '') ?></a></th>
                         <th><a href="<?= sortUrl('subject', $_GET['sort'] ?? '', $_GET['order'] ?? '') ?>" class="sort-link">Subject <?= sortIcon('subject', $_GET['sort'] ?? '', $_GET['order'] ?? '') ?></a></th>
+                        <th>Priority</th>
                         <th><a href="<?= sortUrl('department_name', $_GET['sort'] ?? '', $_GET['order'] ?? '') ?>" class="sort-link">Department <?= sortIcon('department_name', $_GET['sort'] ?? '', $_GET['order'] ?? '') ?></a></th>
                         <th><a href="<?= sortUrl('sender_email', $_GET['sort'] ?? '', $_GET['order'] ?? '') ?>" class="sort-link">Sender <?= sortIcon('sender_email', $_GET['sort'] ?? '', $_GET['order'] ?? '') ?></a></th>
                         <th>API Key</th>
@@ -111,6 +112,21 @@
                             <div style="margin-top:4px;"><?= renderRecipientsHtml($log['recipients'] ?? '', $log['error_message'] ?? '') ?></div>
                         </td>
                         <td><span style="color:var(--text-muted);font-size:0.85rem;"><?= escape(truncate($log['subject'] ?? 'N/A', 30)) ?></span></td>
+                        <td>
+                            <?php if (isset($log['priority']) && $log['priority'] === 1): ?>
+                                <span class="badge-smm badge-smm-danger" style="font-size:0.6rem;">High</span>
+                            <?php elseif (isset($log['priority']) && $log['priority'] === 5): ?>
+                                <span class="badge-smm badge-smm-neutral" style="font-size:0.6rem;">Low</span>
+                            <?php else: ?>
+                                <span style="color:var(--text-muted);font-size:0.7rem;">Normal</span>
+                            <?php endif; ?>
+                            <?php if (!empty($log['has_attachment'])): ?>
+                                <span style="margin-left:4px;color:var(--blue-primary);font-size:0.65rem;"><i class="fas fa-paperclip"></i></span>
+                            <?php endif; ?>
+                            <?php if (!empty($log['reply_to'])): ?>
+                                <span style="margin-left:2px;color:var(--cyan);font-size:0.65rem;" title="Reply-To: <?= escape($log['reply_to']) ?>"><i class="fas fa-reply"></i></span>
+                            <?php endif; ?>
+                        </td>
                         <td><?= escape($log['department_name'] ?? '-') ?></td>
                         <td><span style="font-size:0.82rem;"><?= escape($log['sender_email'] ?? '-') ?></span></td>
                         <td><code style="background:rgba(59,130,246,0.15);color:var(--blue-primary);font-size:0.75rem;padding:2px 6px;border-radius:4px;"><?php if ($log['api_key']): ?><?= escape(substr($log['api_key'], 0, 4)) ?>...<?= escape(substr($log['api_key'], -4)) ?><?php else: ?>-<?php endif; ?></code></td>
@@ -126,7 +142,7 @@
                     </tr>
                     <?php endforeach; ?>
                     <?php if (empty($logs['data'])): ?>
-                    <tr><td colspan="8"><div class="empty-state"><i class="fas fa-inbox"></i><h4>No Email Activity</h4><p>Logs will appear once emails are sent through the platform.</p></div></td></tr>
+                    <tr><td colspan="9"><div class="empty-state"><i class="fas fa-inbox"></i><h4>No Email Activity</h4><p>Logs will appear once emails are sent through the platform.</p></div></td></tr>
                     <?php endif; ?>
                 </tbody>
             </table>
