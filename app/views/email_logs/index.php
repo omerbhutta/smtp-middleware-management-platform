@@ -47,14 +47,20 @@
                             $skippedCt = $totalReq - $delivered;
                             ?>
                             <div style="font-size:0.82rem;color:var(--text-primary);font-weight:600;">
-                                <?= $totalReq ?> recipient<?= $totalReq != 1 ? 's' : '' ?>
+                                <?php if ($totalReq > 0): ?>
+                                    <?= $totalReq ?> recipient<?= $totalReq != 1 ? 's' : '' ?>
+                                <?php else: ?>
+                                    No recipients
+                                <?php endif; ?>
                             </div>
+                            <?php if ($totalReq > 0): ?>
                             <div style="display:flex;gap:8px;margin-top:2px;">
                                 <span style="font-size:0.7rem;color:var(--emerald);"><i class="fas fa-check-circle" style="font-size:0.6rem;"></i> <?= $delivered ?> delivered</span>
                                 <?php if ($skippedCt > 0): ?>
                                 <span style="font-size:0.7rem;color:var(--red);"><i class="fas fa-times-circle" style="font-size:0.6rem;"></i> <?= $skippedCt ?> skipped</span>
                                 <?php endif; ?>
                             </div>
+                            <?php endif; ?>
                             <div style="margin-top:4px;"><?= renderRecipientsHtml($log['recipients'] ?? '', $log['error_message'] ?? '') ?></div>
                         </td>
                         <td><span style="color:var(--text-muted);font-size:0.85rem;"><?= escape(truncate($log['subject'] ?? 'N/A', 30)) ?></span></td>

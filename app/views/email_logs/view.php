@@ -22,10 +22,14 @@
                         $delivered = $log['recipient_count'];
                         $skippedCt = $totalReq - $delivered;
                         ?>
+                        <?php if ($totalReq > 0): ?>
                         <span style="color:var(--text-primary);font-weight:600;"><?= $totalReq ?> total</span>
                         <span class="badge-smm badge-smm-success" style="font-size:0.6rem;vertical-align:middle;"><?= $delivered ?> delivered</span>
                         <?php if ($skippedCt > 0): ?>
                         <span class="badge-smm badge-smm-danger" style="font-size:0.6rem;vertical-align:middle;"><?= $skippedCt ?> skipped</span>
+                        <?php endif; ?>
+                        <?php else: ?>
+                        <span style="color:var(--text-muted);">No recipients</span>
                         <?php endif; ?>
                     </span></div>
                     <div class="tile-stat mb-2"><span class="tile-stat-label">Source IP</span><span class="tile-stat-value"><code style="background:rgba(0,0,0,0.3);"><?= escape($log['source_ip'] ?? 'N/A') ?></code></span></div>
