@@ -1,13 +1,12 @@
-<div class="card-smm animate-fade-up">
-    <div class="card-smm-header">
-        <h3><i class="fas fa-ban me-2" style="color:var(--red);"></i> Suppression Logs</h3>
-        <form method="POST" action="suppression/add" class="d-flex gap-2">
+<?php include VIEW_PATH . 'partials/hero_header.php'; ?>
+
+<div class="card-smm animate-fade-up" style="margin-top:12px;">
+    <div class="card-smm-body">
+        <form method="POST" action="suppression/add" class="filter-bar mb-3">
             <input type="email" name="email" class="form-control-smm" placeholder="Add email to suppression" required style="min-width:200px;">
             <input type="text" name="reason" class="form-control-smm" placeholder="Reason" style="min-width:150px;">
             <button type="submit" class="btn-smm btn-smm-danger btn-smm-sm"><i class="fas fa-plus"></i> Block</button>
         </form>
-    </div>
-    <div class="card-smm-body">
         <form method="GET" action="index.php" class="filter-bar mb-3">
             <input type="hidden" name="route" value="suppression">
             <input type="text" name="search" class="form-control-smm" placeholder="Search suppressed emails..." value="<?= escape($_GET['search'] ?? '') ?>" style="min-width:200px;">

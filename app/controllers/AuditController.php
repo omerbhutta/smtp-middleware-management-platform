@@ -13,6 +13,14 @@ class AuditController
         $order = $_GET['order'] ?? 'DESC';
         $audits = $auditModel->getAll((int)$page, 50, $search, $sort, $order);
 
+        $heroId = 'audit';
+        $heroTitle = 'Audit Logs';
+        $heroIcon = 'fas fa-clipboard-list';
+        $heroSubtitle = 'Track user activities &mdash; <strong>' . ($audits['total'] ?? 0) . ' total entries</strong>';
+        $heroStats = [
+            ['value' => $audits['total'] ?? 0, 'label' => 'Total Entries', 'style' => 'color:var(--blue-primary);font-size:1.1rem;'],
+        ];
+
         $title = 'Audit Logs';
         $active_menu = 'audit';
         $app_name = 'SMTP Management Platform';

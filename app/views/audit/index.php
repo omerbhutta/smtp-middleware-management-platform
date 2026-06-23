@@ -1,7 +1,6 @@
-<div class="card-smm animate-fade-up">
-    <div class="card-smm-header">
-        <h3><i class="fas fa-clipboard-list me-2" style="color:var(--purple);"></i> Audit Logs</h3>
-    </div>
+<?php include VIEW_PATH . 'partials/hero_header.php'; ?>
+
+<div class="card-smm animate-fade-up" style="margin-top:12px;">
     <div class="card-smm-body">
         <form method="GET" action="index.php" class="filter-bar mb-3">
             <input type="hidden" name="route" value="audit">

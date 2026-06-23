@@ -12,6 +12,14 @@ class DepartmentsController
         $order = $_GET['order'] ?? 'DESC';
         $departments = $deptModel->getAll(null, null, $search, $sort, $order);
 
+        $heroId = 'departments';
+        $heroTitle = 'Departments';
+        $heroIcon = 'fas fa-building';
+        $heroSubtitle = 'Manage departments &mdash; <strong>' . count($departments) . ' total</strong>';
+        $heroStats = [
+            ['value' => count($departments), 'label' => 'Total Departments', 'style' => 'color:var(--blue-primary);font-size:1.1rem;'],
+        ];
+
         $title = 'Departments';
         $active_menu = 'departments';
         $app_name = 'SMTP Management Platform';

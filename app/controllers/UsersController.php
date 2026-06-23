@@ -12,6 +12,20 @@ class UsersController
         $order = $_GET['order'] ?? 'DESC';
         $users = $userModel->getAll(null, null, $search, $sort, $order);
 
+        $totalUsers = count($users ?? []);
+        $activeUsers = 0;
+        foreach ($users ?? [] as $u) { if (($u['status'] ?? '') === 'active') $activeUsers++; }
+
+        $heroId = 'users';
+        $heroTitle = 'All Users';
+        $heroIcon = 'fas fa-users';
+        $heroSubtitle = 'Manage platform users &mdash; <strong>' . $totalUsers . ' total users</strong>';
+        $heroStats = [
+            ['value' => $totalUsers, 'label' => 'Total Users', 'style' => 'color:var(--blue-primary);font-size:1.1rem;'],
+            ['value' => $activeUsers, 'label' => 'Active', 'style' => 'color:var(--emerald);font-size:1.1rem;'],
+            ['value' => $totalUsers - $activeUsers, 'label' => 'Inactive', 'style' => 'color:var(--text-muted);font-size:1.1rem;'],
+        ];
+
         $title = 'Users';
         $active_menu = 'users';
         $app_name = 'SMTP Management Platform';

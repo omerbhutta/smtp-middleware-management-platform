@@ -7,6 +7,10 @@ config/database.local.php
 # Installation lock
 app/storage/installed.lock
 
+# Migration lock files (environment-specific)
+app/storage/.migrations_applied
+app/storage/.migrations_applied_v2
+
 # Update lock
 .update_lock
 

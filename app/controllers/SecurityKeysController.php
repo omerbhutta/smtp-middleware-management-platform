@@ -12,6 +12,15 @@ class SecurityKeysController
         $order = $_GET['order'] ?? 'DESC';
         $keys = $keyModel->getAll(null, $search, $sort, $order);
 
+        $keysData = $keys['data'] ?? $keys;
+        $heroId = 'security_keys';
+        $heroTitle = 'Security Keys';
+        $heroIcon = 'fas fa-key';
+        $heroSubtitle = 'Manage API security keys &mdash; <strong>' . ($keys['total'] ?? count($keysData)) . ' total keys</strong>';
+        $heroStats = [
+            ['value' => $keys['total'] ?? count($keysData), 'label' => 'Total Keys', 'style' => 'color:var(--blue-primary);font-size:1.1rem;'],
+        ];
+
         $title = 'Security Keys';
         $active_menu = 'security_keys';
         $app_name = 'SMTP Management Platform';

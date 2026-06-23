@@ -12,6 +12,24 @@ class SuppressionController
         $sort = $_GET['sort'] ?? 'created_at';
         $order = $_GET['order'] ?? 'DESC';
         $suppressions = $suppression->getAll((int)$page, 50, $search, $sort, $order);
+        $suppressionStats = $suppression->getStats();
+        $totalSuppressed = $suppression->count();
+        $manualCount = 0;
+        $ebmCount = 0;
+        foreach ($suppressionStats as $s) {
+            if ($s['source'] === 'manual') $manualCount = $s['count'];
+            else $ebmCount += $s['count'];
+        }
+
+        $heroId = 'suppression';
+        $heroTitle = 'Suppression Logs';
+        $heroIcon = 'fas fa-ban';
+        $heroSubtitle = 'Manage blocked email addresses &mdash; <strong>' . $totalSuppressed . ' total suppressed</strong>';
+        $heroStats = [
+            ['value' => $totalSuppressed, 'label' => 'Total Suppressed', 'style' => 'color:var(--red);font-size:1.1rem;'],
+            ['value' => $manualCount, 'label' => 'Manual Blocks', 'style' => 'color:var(--amber);font-size:1.1rem;'],
+            ['value' => $ebmCount, 'label' => 'Auto-Blocked', 'style' => 'color:var(--blue-primary);font-size:1.1rem;'],
+        ];
 
         $title = 'Suppression List';
         $active_menu = 'suppression';

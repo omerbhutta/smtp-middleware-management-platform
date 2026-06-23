@@ -1,7 +1,53 @@
-<div class="card-smm animate-fade-up">
-    <div class="card-smm-header">
-        <h3><i class="fas fa-envelope-open-text me-2" style="color:var(--blue-primary);"></i> Email Activity</h3>
+<div class="hero-section animate-fade-up" style="min-height:auto;padding:28px 32px;">
+    <div class="anim-wave" style="position:absolute;bottom:0;left:0;right:0;height:30px;z-index:0;opacity:0.3;">
+        <svg viewBox="0 0 1440 40" preserveAspectRatio="none" style="width:200%;height:100%;">
+            <defs>
+                <linearGradient id="waveGrad3" x1="0%" y1="0%" x2="100%" y2="0%">
+                    <stop offset="0%" stop-color="#3b82f6" stop-opacity="0"/>
+                    <stop offset="50%" stop-color="#3b82f6" stop-opacity="0.4"/>
+                    <stop offset="100%" stop-color="#06b6d4" stop-opacity="0"/>
+                </linearGradient>
+            </defs>
+            <path class="anim-wave-fill" fill="url(#waveGrad3)" d="M0,20 C240,0 480,40 720,20 C960,0 1200,40 1440,20 L1440,40 L0,40 Z"/>
+        </svg>
     </div>
+    <div style="position:relative;z-index:1;">
+        <div>
+            <h1 class="hero-title" style="font-size:1.5rem;">
+                <i class="fas fa-envelope-open-text" style="color:var(--blue-primary);margin-right:8px;"></i>
+                Email Activity
+            </h1>
+            <p class="hero-subtitle" style="font-size:0.85rem;">Track all email requests sent through the platform &mdash; <strong><?= $totalCount ?> total</strong></p>
+        </div>
+    </div>
+    <?php
+    $successRate = $totalCount > 0 ? round(($stats['sent'] / max($totalCount, 1)) * 100, 1) : 100;
+    ?>
+    <div class="hero-stats" style="position:relative;z-index:1;margin-top:16px;">
+        <div class="hero-stat">
+            <div class="hero-stat-value" style="color:var(--blue-primary);font-size:1.1rem;"><?= $totalCount ?></div>
+            <div class="hero-stat-label">Total Requests</div>
+        </div>
+        <div class="hero-stat">
+            <div class="hero-stat-value" style="color:var(--emerald);font-size:1.1rem;"><?= $todayCount ?></div>
+            <div class="hero-stat-label">Sent Today</div>
+        </div>
+        <div class="hero-stat">
+            <div class="hero-stat-value" style="color:var(--red);font-size:1.1rem;"><?= $failedCount ?></div>
+            <div class="hero-stat-label">Failed</div>
+        </div>
+        <div class="hero-stat">
+            <div class="hero-stat-value" style="color:var(--amber);font-size:1.1rem;"><?= $stats['skipped'] ?></div>
+            <div class="hero-stat-label">Skipped</div>
+        </div>
+        <div class="hero-stat">
+            <div class="hero-stat-value" style="font-size:1.1rem;"><?= $successRate ?>%</div>
+            <div class="hero-stat-label">Success Rate</div>
+        </div>
+    </div>
+</div>
+
+<div class="card-smm animate-fade-up" style="margin-top:12px;">
     <div class="card-smm-body">
         <!-- Filters -->
         <form method="GET" action="index.php" class="filter-bar">

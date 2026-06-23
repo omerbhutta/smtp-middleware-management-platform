@@ -227,6 +227,8 @@ if ($totalSkipped > 0) {
 }
 
 // Log the attempt
+$ccStr = $cc ? implode(',', splitRecipients($cc)) : null;
+$bccStr = $bcc ? implode(',', splitRecipients($bcc)) : null;
 try {
     $logModel = new EmailLog();
     $logModel->create([
@@ -235,6 +237,9 @@ try {
         'smtp_account_id'  => $smtpAccount['id'],
         'sender_email'     => $from ?: $smtpAccount['sender_email'],
         'recipients'        => $recipientsStr,
+        'cc'               => $ccStr,
+        'bcc'              => $bccStr,
+        'has_attachment'    => !empty($attachmentURL) ? 1 : 0,
         'recipient_count'   => $totalValid,
         'total_recipients'  => $totalRequested,
         'subject'           => $subject,

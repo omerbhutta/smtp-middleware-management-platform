@@ -12,6 +12,19 @@ class SmtpAccountsController
         $order = $_GET['order'] ?? 'DESC';
         $accounts = $smtpModel->getAll(null, $search, $sort, $order);
 
+        $totalAccounts = count($accounts);
+        $activeAccounts = count(array_filter($accounts, fn($a) => ($a['status'] ?? '') === 'active'));
+
+        $heroId = 'smtp_accounts';
+        $heroTitle = 'SMTP Accounts';
+        $heroIcon = 'fas fa-server';
+        $heroSubtitle = 'Manage SMTP server configurations &mdash; <strong>' . $totalAccounts . ' total accounts</strong>';
+        $heroStats = [
+            ['value' => $totalAccounts, 'label' => 'Total Accounts', 'style' => 'color:var(--blue-primary);font-size:1.1rem;'],
+            ['value' => $activeAccounts, 'label' => 'Active', 'style' => 'color:var(--emerald);font-size:1.1rem;'],
+            ['value' => $totalAccounts - $activeAccounts, 'label' => 'Inactive', 'style' => 'color:var(--text-muted);font-size:1.1rem;'],
+        ];
+
         $title = 'SMTP Accounts';
         $active_menu = 'smtp_accounts';
         $app_name = 'SMTP Management Platform';

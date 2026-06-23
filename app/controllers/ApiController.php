@@ -90,22 +90,25 @@ class ApiController
 
         $result = SmtpMailer::send($smtpConfig, $toArray, $subject, $body, $from, $fromName, $bccArray, $attachments, $ccArray);
 
-        if ($result['status']) {
+        try {
             $logModel = new EmailLog();
-            $logModel->log([
-                'api_key_id'    => $keyData['id'],
-                'department_id' => $keyData['department_id'],
-                'recipients'    => implode(',', $toArray),
-                'cc'            => implode(',', $ccArray),
-                'bcc'           => implode(',', $bccArray),
-                'subject'       => $subject,
-                'sender_email'  => $from ?? $smtpConfig['sender_email'],
-                'sender_name'   => $fromName ?? $smtpConfig['sender_name'],
-                'status'        => 'sent',
+            $logModel->create([
+                'security_key_id'  => $keyData['id'],
+                'department_id'    => $keyData['department_id'],
+                'smtp_account_id'  => $smtpConfig['id'],
+                'sender_email'     => $from ?? $smtpConfig['sender_email'],
+                'recipients'       => implode(',', $toArray),
+                'cc'               => $cc ? implode(',', $ccArray) : null,
+                'bcc'              => $bcc ? implode(',', $bccArray) : null,
+                'has_attachment'   => !empty($_FILES['attachments']) ? 1 : 0,
+                'recipient_count'  => count($toArray),
                 'total_recipients' => count($toArray) + count($ccArray) + count($bccArray),
-                'source_ip'     => $_SERVER['REMOTE_ADDR'] ?? '',
+                'subject'          => $subject,
+                'source_ip'        => $_SERVER['REMOTE_ADDR'] ?? '',
+                'status'           => $result['status'] ? 'sent' : 'failed',
+                'error_message'    => $result['status'] ? null : ($result['message'] ?? 'Failed'),
             ]);
-        }
+        } catch (Exception $e) {}
 
         echo json_encode($result);
     }

@@ -1,9 +1,11 @@
-<div class="card-smm animate-fade-up">
-    <div class="card-smm-header">
-        <h3><i class="fas fa-server me-2" style="color:var(--cyan);"></i> SMTP Accounts</h3>
-        <a href="smtp_accounts/create" class="btn-smm btn-smm-primary btn-smm-sm"><i class="fas fa-plus"></i> Add SMTP</a>
-    </div>
+<?php include VIEW_PATH . 'partials/hero_header.php'; ?>
+
+<div class="card-smm animate-fade-up" style="margin-top:12px;">
     <div class="card-smm-body">
+        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:12px;">
+            <div style="font-size:0.9rem;color:var(--text-muted);">All configured SMTP accounts</div>
+            <a href="smtp_accounts/create" class="btn-smm btn-smm-primary btn-smm-sm"><i class="fas fa-plus"></i> Add SMTP Account</a>
+        </div>
         <form method="GET" action="index.php" class="filter-bar mb-3">
             <input type="hidden" name="route" value="smtp_accounts">
             <input type="text" name="search" class="form-control-smm" placeholder="Search SMTP accounts..." value="<?= escape($_GET['search'] ?? '') ?>" style="min-width:200px;">

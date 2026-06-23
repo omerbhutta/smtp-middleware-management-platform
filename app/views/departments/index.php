@@ -1,9 +1,11 @@
-<div class="card-smm animate-fade-up">
-    <div class="card-smm-header">
-        <h3><i class="fas fa-building me-2" style="color:var(--blue-primary);"></i> Departments</h3>
-        <a href="departments/create" class="btn-smm btn-smm-primary btn-smm-sm"><i class="fas fa-plus"></i> New Department</a>
-    </div>
+<?php include VIEW_PATH . 'partials/hero_header.php'; ?>
+
+<div class="card-smm animate-fade-up" style="margin-top:12px;">
     <div class="card-smm-body">
+        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:12px;">
+            <div style="font-size:0.9rem;color:var(--text-muted);">All configured departments</div>
+            <a href="departments/create" class="btn-smm btn-smm-primary btn-smm-sm"><i class="fas fa-plus"></i> New Department</a>
+        </div>
         <form method="GET" action="index.php" class="filter-bar mb-3">
             <input type="hidden" name="route" value="departments">
             <input type="text" name="search" class="form-control-smm" placeholder="Search departments..." value="<?= escape($_GET['search'] ?? '') ?>" style="min-width:200px;">

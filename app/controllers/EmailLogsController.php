@@ -25,6 +25,11 @@ class EmailLogsController
         $deptModel = new Department();
         $departments = $deptModel->getAll('active');
 
+        $stats = $logModel->getSentFailedSkippedTotals();
+        $todayCount = $logModel->getTodayCount();
+        $failedCount = $logModel->getFailedCount();
+        $totalCount = $logModel->getTotalEmailCount();
+
         $title = 'Email Logs';
         $active_menu = 'email_logs';
         $app_name = 'SMTP Management Platform';
