@@ -123,7 +123,7 @@
 
                 <span class="header-clock-wrap" style="font-size:0.8rem;color:var(--text-muted);">
                     <i class="far fa-clock me-1"></i> <span id="headerClock"><?= date('D, M j, Y | h:i:s A') ?></span>
-                    <span class="badge-smm badge-smm-neutral" style="font-size:0.55rem;margin-left:4px;vertical-align:middle;"><?= date('T') ?></span>
+                    <span class="badge-smm badge-smm-neutral" style="font-size:0.55rem;margin-left:4px;vertical-align:middle;"><?= $_ENV['APP_TIMEZONE'] ?? date_default_timezone_get() ?></span>
                 </span>
 
                 <div class="dropdown">
