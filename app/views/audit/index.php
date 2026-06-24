@@ -40,13 +40,13 @@
     </div>
     <?php if ($audits['total_pages'] > 1): ?>
     <div class="card-smm-footer">
-        <ul class="pagination-smm mb-0">
-            <li class="page-item <?= $audits['page'] <= 1 ? 'disabled' : '' ?>"><a class="page-link" href="?route=audit&page=<?= $audits['page'] - 1 ?>&sort=<?= urlencode($_GET['sort'] ?? '') ?>&order=<?= urlencode($_GET['order'] ?? '') ?>&search=<?= urlencode($_GET['search'] ?? '') ?>"><i class="fas fa-chevron-left"></i></a></li>
-            <?php for ($i = 1; $i <= $audits['total_pages']; $i++): ?>
-                <li class="page-item <?= $i == $audits['page'] ? 'active' : '' ?>"><a class="page-link" href="?route=audit&page=<?= $i ?>&sort=<?= urlencode($_GET['sort'] ?? '') ?>&order=<?= urlencode($_GET['order'] ?? '') ?>&search=<?= urlencode($_GET['search'] ?? '') ?>"><?= $i ?></a></li>
-            <?php endfor; ?>
-            <li class="page-item <?= $audits['page'] >= $audits['total_pages'] ? 'disabled' : '' ?>"><a class="page-link" href="?route=audit&page=<?= $audits['page'] + 1 ?>&sort=<?= urlencode($_GET['sort'] ?? '') ?>&order=<?= urlencode($_GET['order'] ?? '') ?>&search=<?= urlencode($_GET['search'] ?? '') ?>"><i class="fas fa-chevron-right"></i></a></li>
-        </ul>
+        <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;">
+            <span style="font-size:0.78rem;color:var(--text-muted);">Page <?= $audits['page'] ?> of <?= $audits['total_pages'] ?> (<?= $audits['total'] ?> records)</span>
+            <?php
+                $url = '?route=audit&sort=' . urlencode($_GET['sort'] ?? '') . '&order=' . urlencode($_GET['order'] ?? '') . '&search=' . urlencode($_GET['search'] ?? '');
+                echo renderPagination($audits['page'], $audits['total_pages'], $url);
+            ?>
+        </div>
     </div>
     <?php endif; ?>
 </div>

@@ -149,19 +149,13 @@
         </div>
 
         <?php if ($logs['total_pages'] > 1): ?>
-        <ul class="pagination-smm mt-3">
-            <li class="page-item <?= $logs['page'] <= 1 ? 'disabled' : '' ?>">
-                <a class="page-link" href="?route=email_logs&page=<?= $logs['page'] - 1 ?>&<?= http_build_query(array_diff_key($_GET, ['route' => '', 'page' => ''])) ?>"><i class="fas fa-chevron-left"></i></a>
-            </li>
-            <?php for ($i = 1; $i <= $logs['total_pages']; $i++): ?>
-                <li class="page-item <?= $i == $logs['page'] ? 'active' : '' ?>">
-                    <a class="page-link" href="?route=email_logs&page=<?= $i ?>&<?= http_build_query(array_diff_key($_GET, ['route' => '', 'page' => ''])) ?>"><?= $i ?></a>
-                </li>
-            <?php endfor; ?>
-            <li class="page-item <?= $logs['page'] >= $logs['total_pages'] ? 'disabled' : '' ?>">
-                <a class="page-link" href="?route=email_logs&page=<?= $logs['page'] + 1 ?>&<?= http_build_query(array_diff_key($_GET, ['route' => '', 'page' => ''])) ?>"><i class="fas fa-chevron-right"></i></a>
-            </li>
-        </ul>
+        <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-top:16px;">
+            <span style="font-size:0.78rem;color:var(--text-muted);">Page <?= $logs['page'] ?> of <?= $logs['total_pages'] ?> (<?= $logs['total'] ?> records)</span>
+            <?php
+                $url = '?route=email_logs&' . http_build_query(array_diff_key($_GET, ['route' => '', 'page' => '']));
+                echo renderPagination($logs['page'], $logs['total_pages'], $url);
+            ?>
+        </div>
         <?php endif; ?>
     </div>
 </div>

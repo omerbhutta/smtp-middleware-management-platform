@@ -51,13 +51,13 @@
     </div>
     <?php if ($suppressions['total_pages'] > 1): ?>
     <div class="card-smm-footer">
-        <ul class="pagination-smm mb-0">
-            <li class="page-item <?= $suppressions['page'] <= 1 ? 'disabled' : '' ?>"><a class="page-link" href="?route=suppression&page=<?= $suppressions['page'] - 1 ?>&sort=<?= urlencode($_GET['sort'] ?? '') ?>&order=<?= urlencode($_GET['order'] ?? '') ?>&search=<?= urlencode($_GET['search'] ?? '') ?>"><i class="fas fa-chevron-left"></i></a></li>
-            <?php for ($i = 1; $i <= $suppressions['total_pages']; $i++): ?>
-                <li class="page-item <?= $i == $suppressions['page'] ? 'active' : '' ?>"><a class="page-link" href="?route=suppression&page=<?= $i ?>&sort=<?= urlencode($_GET['sort'] ?? '') ?>&order=<?= urlencode($_GET['order'] ?? '') ?>&search=<?= urlencode($_GET['search'] ?? '') ?>"><?= $i ?></a></li>
-            <?php endfor; ?>
-            <li class="page-item <?= $suppressions['page'] >= $suppressions['total_pages'] ? 'disabled' : '' ?>"><a class="page-link" href="?route=suppression&page=<?= $suppressions['page'] + 1 ?>&sort=<?= urlencode($_GET['sort'] ?? '') ?>&order=<?= urlencode($_GET['order'] ?? '') ?>&search=<?= urlencode($_GET['search'] ?? '') ?>"><i class="fas fa-chevron-right"></i></a></li>
-        </ul>
+        <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;">
+            <span style="font-size:0.78rem;color:var(--text-muted);">Page <?= $suppressions['page'] ?> of <?= $suppressions['total_pages'] ?> (<?= $suppressions['total'] ?> records)</span>
+            <?php
+                $url = '?route=suppression&sort=' . urlencode($_GET['sort'] ?? '') . '&order=' . urlencode($_GET['order'] ?? '') . '&search=' . urlencode($_GET['search'] ?? '');
+                echo renderPagination($suppressions['page'], $suppressions['total_pages'], $url);
+            ?>
+        </div>
     </div>
     <?php endif; ?>
 </div>

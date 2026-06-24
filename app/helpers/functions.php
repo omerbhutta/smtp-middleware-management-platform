@@ -243,3 +243,47 @@ function buildSortSql($sort, $order, $allowedColumns, $defaultSort = 'created_at
     $order = strtoupper($order) === 'ASC' ? 'ASC' : ($order === 'DESC' ? 'DESC' : $defaultOrder);
     return " ORDER BY {$sort} {$order}";
 }
+
+function renderPagination($currentPage, $totalPages, $baseUrl)
+{
+    if ($totalPages <= 1) return '';
+    $window = 2;
+    $html = '<ul class="pagination-smm mb-0">';
+
+    // Prev
+    $prevDisabled = $currentPage <= 1 ? 'disabled' : '';
+    $prevUrl = $prevDisabled ? '#' : $baseUrl . '&page=' . ($currentPage - 1);
+    $html .= '<li class="page-item ' . $prevDisabled . '"><a class="page-link" href="' . $prevUrl . '"><i class="fas fa-chevron-left"></i></a></li>';
+
+    // First page
+    if ($currentPage > $window + 2) {
+        $html .= '<li class="page-item"><a class="page-link" href="' . $baseUrl . '&page=1">1</a></li>';
+        if ($currentPage > $window + 3) {
+            $html .= '<li class="page-item disabled"><span class="page-link">...</span></li>';
+        }
+    }
+
+    // Window around current
+    $start = max(1, $currentPage - $window);
+    $end = min($totalPages, $currentPage + $window);
+    for ($i = $start; $i <= $end; $i++) {
+        $active = $i == $currentPage ? 'active' : '';
+        $html .= '<li class="page-item ' . $active . '"><a class="page-link" href="' . $baseUrl . '&page=' . $i . '">' . $i . '</a></li>';
+    }
+
+    // Last page
+    if ($currentPage < $totalPages - $window - 1) {
+        if ($currentPage < $totalPages - $window - 2) {
+            $html .= '<li class="page-item disabled"><span class="page-link">...</span></li>';
+        }
+        $html .= '<li class="page-item"><a class="page-link" href="' . $baseUrl . '&page=' . $totalPages . '">' . $totalPages . '</a></li>';
+    }
+
+    // Next
+    $nextDisabled = $currentPage >= $totalPages ? 'disabled' : '';
+    $nextUrl = $nextDisabled ? '#' : $baseUrl . '&page=' . ($currentPage + 1);
+    $html .= '<li class="page-item ' . $nextDisabled . '"><a class="page-link" href="' . $nextUrl . '"><i class="fas fa-chevron-right"></i></a></li>';
+
+    $html .= '</ul>';
+    return $html;
+}
