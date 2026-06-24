@@ -123,7 +123,8 @@ try {
 
     $settings = new SystemSetting();
     $appSettings = $settings->getAllAsArray();
-    date_default_timezone_set($appSettings['app_timezone'] ?? 'UTC');
+    $tz = $_ENV['APP_TIMEZONE'] ?? ($appSettings['app_timezone'] ?? 'UTC');
+    date_default_timezone_set($tz);
 
     // Restore user preferences from DB if missing from session (fresh login / new device)
     if (!empty($_SESSION['logged_in']) && empty($_SESSION['theme'])) {
