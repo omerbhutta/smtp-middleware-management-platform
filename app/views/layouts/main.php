@@ -122,7 +122,8 @@
                 </button>
 
                 <span class="header-clock-wrap" style="font-size:0.8rem;color:var(--text-muted);">
-                    <i class="far fa-clock me-1"></i> <span id="headerClock"></span>
+                    <i class="far fa-clock me-1"></i> <span id="headerClock"><?= date('D, M j, Y | h:i:s A') ?></span>
+                    <span class="badge-smm badge-smm-neutral" style="font-size:0.55rem;margin-left:4px;vertical-align:middle;"><?= date('T') ?></span>
                 </span>
 
                 <div class="dropdown">
@@ -166,10 +167,14 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script src="public/js/script.js"></script>
     <script>
-    // Live clock
+    // Live clock (America/Los_Angeles)
+    var serverTime = <?= time() ?>;
     function updateClock() {
-        var now = new Date();
-        document.getElementById('headerClock').textContent = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
+        var d = new Date(serverTime * 1000);
+        var parts = d.toLocaleDateString('en-US', { timeZone: 'America/Los_Angeles', weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' });
+        var time = d.toLocaleTimeString('en-US', { timeZone: 'America/Los_Angeles', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true });
+        document.getElementById('headerClock').innerHTML = parts + ' &nbsp;|&nbsp; ' + time;
+        serverTime++;
     }
     updateClock();
     setInterval(updateClock, 1000);

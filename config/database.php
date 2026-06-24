@@ -16,6 +16,7 @@ if (!empty($_ENV['DB_HOST'])) {
         'password' => $_ENV['DB_PASSWORD'] ?? '',
         'database' => $_ENV['DB_DATABASE'],
         'charset'  => 'utf8mb4',
+        'timezone' => $_ENV['APP_TIMEZONE'] ?? 'America/Los_Angeles',
     ];
 }
 
@@ -31,4 +32,5 @@ return [
     'password' => '',
     'database' => 'smmp_smtp',
     'charset'  => 'utf8mb4',
+    'timezone' => 'America/Los_Angeles',
 ];

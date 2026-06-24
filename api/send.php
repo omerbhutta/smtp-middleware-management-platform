@@ -47,6 +47,11 @@ try {
     exit;
 }
 
+// Set PHP timezone to match app setting
+if (!empty($_ENV['APP_TIMEZONE'])) {
+    date_default_timezone_set($_ENV['APP_TIMEZONE']);
+}
+
 $securityKey = $_REQUEST['security'] ?? '';
 $subject     = $_REQUEST['subject'] ?? '';
 $to          = $_REQUEST['to'] ?? '';

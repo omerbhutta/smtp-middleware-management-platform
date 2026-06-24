@@ -15,6 +15,9 @@ class Database
                 PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
                 PDO::ATTR_EMULATE_PREPARES   => true,
             ]);
+            $tz = $config['timezone'] ?? 'America/Los_Angeles';
+            $offset = (new DateTime('now', new DateTimeZone($tz)))->format('P');
+            $this->pdo->exec("SET time_zone = '{$offset}'");
         } catch (PDOException $e) {
             if (defined('INSTALL_MODE') && INSTALL_MODE) {
                 throw $e;
