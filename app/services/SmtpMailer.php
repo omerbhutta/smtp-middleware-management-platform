@@ -15,6 +15,8 @@ class SmtpMailer
             $mail->SMTPAuth   = true;
             $mail->Username   = $smtpConfig['smtp_username'];
             $mail->Password   = $smtpConfig['smtp_password'];
+            $mail->CharSet    = 'UTF-8';
+            $mail->Encoding   = 'base64';
 
             if ($smtpConfig['encryption'] === 'tls') {
                 $mail->SMTPSecure = PHPMailer\PHPMailer\PHPMailer::ENCRYPTION_STARTTLS;
